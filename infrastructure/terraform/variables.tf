@@ -3,6 +3,16 @@ variable "tenant_id" {
   type        = string 
 }
 
+variable "vnet_rg" {
+  description = "Virtual Network Resource Group"
+  type        = string
+}
+
+variable "dns_rg" {
+  description = "DNS Resource Group"
+  type        = string
+}
+
 variable "admin_user_object_id" {
   description = "Azure AD Object ID of PostgreSQL Admin User"
   type        = string 
@@ -41,21 +51,6 @@ variable "postgresql_database_name" {
   default     = "transcriptsdb"
 }
 
-variable "acr_account_name" {
-  description = "Azure Container Repository"
-  type        = string
-}
-
-variable "ai_account_name" {
-  description = "Application Insights"
-  type        = string
-}
-
-variable "loganalytics_account_name" {
-  description = "Log Analytics"
-  type        = string
-}
-
 variable "vnet_name" {
   description = "Virtual Network Name"
   type        = string
@@ -66,28 +61,18 @@ variable "service_bus_namespace_name" {
   type        = string
 }
 
-variable "aks_name" {
-  description = "AKS Cluster"
-  type        = string
-}
-
-variable "ui_storage_name" {
-  description = "Storage Account for the Application UI"
-  type        = string
-}
-
 variable "mp3_storage_name" {
   description = "Storage Account for the mp3s transcribed"
   type        = string
 }
 
-variable "keyvault_name" {
-  description = "Azure Key Vault"
+variable "ui_storage_name" {
+  description = "Azure Static Website"
   type        = string
 }
 
-variable "api_server_authorized_ip_ranges" {
-  description = "IP Range for K8S API Access"
+variable "keyvault_name" {
+  description = "Azure Key Vault"
   type        = string
 }
 
@@ -124,4 +109,9 @@ variable "pubsub_secret_name" {
   description = "Key Vault Secret Name for Web PubSub Primary Key"
   type        = string
   default     = "pubsubkey"
+}
+
+variable "api_server_authorized_ip_ranges" {
+  description = "IP Ranges for API Server"
+  type        = string  
 }

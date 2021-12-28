@@ -3,13 +3,7 @@ kind: Configuration
 metadata:
   name: {{ print .Values.app_name "-config" | quote }}
 spec:
-    metric:
-        enabled: false
-    tracing:
-        samplingRate: "1"
-        zipkin:
-            endpointAddress: "http://otel-collector.default.svc.cluster.local:9411/api/v2/spans"
-    mtls:
-        enabled: true
-        workloadCertTTL: "24h"
-        allowedClockSkew: "15m"
+  metric:
+    enabled: false
+  mtls:
+    enabled: false

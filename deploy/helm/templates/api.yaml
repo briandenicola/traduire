@@ -11,6 +11,7 @@ spec:
     metadata:
       annotations:
         dapr.io/enabled: "true"
+        sidecar.istio.io/inject: "false"
         dapr.io/config: {{ print .Values.app_name "-config" | quote }}
         dapr.io/app-id: {{ print .Values.app_name "-api" | quote }}
         dapr.io/log-level: "info"
@@ -48,14 +49,14 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ print .Values.app_name "-svc" }}
+  annotations:
+   service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   labels:
     version: {{ .Values.commit_version | quote }}
-  annotations:
-    konghq.com/protocol: "grpc"
 spec:
   selector:
     app: {{ print .Values.app_name "-api" }} 
   ports:
   - port: {{ .Values.service_port }}
     targetPort: 80
-  type: NodePort
+  type: LoadBalancer

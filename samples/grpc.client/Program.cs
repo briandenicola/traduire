@@ -18,21 +18,23 @@ namespace GrpcTraduireClient
             var config = builder.Build();
             
             var address = config["ApiServer"]; //"https://api.bjdazure.tech";
-            var apikey = config["ApiKey"];
+//            var apikey = config["ApiKey"];
 
             Console.WriteLine($"Connecting to {address}");
 
-            var credentials = CallCredentials.FromInterceptor((context, metadata) =>
+/*            var credentials = CallCredentials.FromInterceptor((context, metadata) =>
             {
                 metadata.Add("apikey", apikey);
                 return Task.CompletedTask;
             });
 
+
             var channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions
             {
                 Credentials = ChannelCredentials.Create(new SslCredentials(), credentials)
             });
-        
+*/        
+            var channel = GrpcChannel.ForAddress(address);
             var client =  new Transcriber.TranscriberClient(channel);
 
             var replies = client.TranscribeAudioStream(
