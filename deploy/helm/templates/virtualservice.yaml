@@ -1,0 +1,13 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ print .Values.hostname "-vs" | replace "." "-" }}
+spec:
+  hosts:
+  - {{ .Values.hostname }}
+  gateways:
+  -  {{ .Values.istio_gateway }}
+  http:
+  - route:
+    - destination:
+        host: {{ print .Values.app_name "-svc" }}
