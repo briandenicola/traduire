@@ -16,6 +16,9 @@ spec:
         dapr.io/app-id: {{ print .Values.app_name "-api" | quote }}
         dapr.io/log-level: "info"
         dapr.io/http-max-request-size: "512"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/"
         {{ print .Values.app_name "/config-hash" }}: {{ include (print $.Template.BasePath "/components.yaml") . | sha256sum }}
       labels:
         app: {{ print .Values.app_name "-api" }}
