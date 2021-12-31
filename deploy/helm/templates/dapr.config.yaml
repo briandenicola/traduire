@@ -6,7 +6,6 @@ spec:
   metric:
     enabled: true
   tracing:
-    enabled: true 
     samplingRate: "1"
     zipkin:
         endpointAddress: "http://otel-collector.default.svc.cluster.local:9411/api/v2/spans"
