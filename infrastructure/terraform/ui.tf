@@ -1,5 +1,5 @@
 resource "azurerm_resource_group" "traduire_ui" {
-  name                  = "${var.application_name}_ui_rg"
+  name                  = "DevSub02_${var.application_name}_ui_rg"
   location              = var.region
   tags                  = {
     Application         = var.application_name

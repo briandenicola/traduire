@@ -115,3 +115,8 @@ variable "api_server_authorized_ip_ranges" {
   description = "IP Ranges for API Server"
   type        = string  
 }
+
+variable "core_subscription" {
+  default     = "2deb88fe-eca8-499a-adb9-6e0ea8b6c1d2"
+  description = "The subscription where Azure Container Repo lives"
+}

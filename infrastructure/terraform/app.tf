@@ -1,5 +1,5 @@
 resource "azurerm_resource_group" "traduire_app" {
-  name                  = "${var.application_name}_app_rg"
+  name                  = "DevSub02_${var.application_name}_app_rg"
   location              = var.region
   tags                  = {
     Application         = var.application_name
@@ -68,8 +68,8 @@ resource "azurerm_private_endpoint" "postgresql_database" {
   }
 
   private_dns_zone_group { 
-    name                          = azurerm_private_dns_zone.privatelink_postgres_database_azure_com.name
-    private_dns_zone_ids          = [ azurerm_private_dns_zone.privatelink_postgres_database_azure_com.id ]
+    name                          = data.azurerm_private_dns_zone.privatelink_postgres_database_azure_com.name
+    private_dns_zone_ids          = [ data.azurerm_private_dns_zone.privatelink_postgres_database_azure_com.id ]
   }
 }
 
@@ -95,8 +95,8 @@ resource "azurerm_private_endpoint" "servicebus_namespace" {
   }
 
   private_dns_zone_group {
-    name                          = azurerm_private_dns_zone.privatelink_servicebus_windows_net.name
-    private_dns_zone_ids          = [ azurerm_private_dns_zone.privatelink_servicebus_windows_net.id ]
+    name                          = data.azurerm_private_dns_zone.privatelink_servicebus_windows_net.name
+    private_dns_zone_ids          = [ data.azurerm_private_dns_zone.privatelink_servicebus_windows_net.id ]
   }
 }
 
@@ -132,8 +132,8 @@ resource "azurerm_private_endpoint" "storage_account" {
   }
 
   private_dns_zone_group {
-    name                          = azurerm_private_dns_zone.privatelink_blob_core_windows_net.name
-    private_dns_zone_ids          = [ azurerm_private_dns_zone.privatelink_blob_core_windows_net.id ]
+    name                          = data.azurerm_private_dns_zone.privatelink_blob_core_windows_net.name
+    private_dns_zone_ids          = [ data.azurerm_private_dns_zone.privatelink_blob_core_windows_net.id ]
   }
 }
 

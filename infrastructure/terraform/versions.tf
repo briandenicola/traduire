@@ -1,6 +1,4 @@
-provider "azurerm" {
-  features  {}
-}
+
 
 terraform {
   required_version = ">= 1.0"
@@ -9,3 +7,12 @@ terraform {
   }
 }
 
+provider "azurerm" {
+  features  {}
+}
+
+provider "azurerm" {
+  alias           = "core"
+  features        {}
+  subscription_id = var.core_subscription
+}

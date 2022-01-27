@@ -1,6 +1,6 @@
 application_name = "traduire"
 vnet_rg = "DevSub02_Network_RG"
-dns_rg = "DevSub02_DNS_RG"
+dns_rg = "Core_Infra_DNS_RG"
 region = "centralus"
 tenant_id = "72f988bf-86f1-41af-91ab-2d7cd011db47"
 admin_user_object_id = "266c3384-8711-42c3-9f2b-ce21c4734c9d"
