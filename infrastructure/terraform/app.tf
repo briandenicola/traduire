@@ -1,10 +1,15 @@
 resource "azurerm_resource_group" "traduire_app" {
-  name                  = "DevSub02_${var.application_name}_app_rg"
+  name                  = "DevSub01_${var.application_name}_app_rg"
   location              = var.region
   tags                  = {
     Application         = var.application_name
     Tier                = "App Components"
   }
+
+  provisioner "local-exec" {
+    command = "bash ./create_pubsub.sh ${var.pubsub_name} ${azurerm_resource_group.traduire_app.name} ${var.pubsub_secret_name} ${var.keyvault_name} ${var.region}"
+  }
+
 }
 
 data "azurerm_client_config" "current" {}
