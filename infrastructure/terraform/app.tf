@@ -5,11 +5,6 @@ resource "azurerm_resource_group" "traduire_app" {
     Application         = var.application_name
     Tier                = "App Components"
   }
-
-  provisioner "local-exec" {
-    command = "bash ./create_pubsub.sh ${var.pubsub_name} ${azurerm_resource_group.traduire_app.name} ${var.pubsub_secret_name} ${var.keyvault_name} ${var.region}"
-  }
-
 }
 
 data "azurerm_client_config" "current" {}
@@ -257,4 +252,13 @@ resource "azurerm_role_assignment" "keda_sb_data_owner" {
   role_definition_name      = "Azure Service Bus Data Owner" 
   principal_id              = azurerm_user_assigned_identity.keda_sb_user.principal_id
   skip_service_principal_aad_check = true
+}
+
+resource "nul_resource" "traduire_webpubsub" {
+  depends_on = [
+    azurerm_key_vault.traduire_app
+  ]
+  provisioner "local-exec" {
+    command = "bash ./create_pubsub.sh ${var.pubsub_name} ${azurerm_resource_group.traduire_app.name} ${var.pubsub_secret_name} ${var.keyvault_name} ${var.region}"
+  }  
 }
