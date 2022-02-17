@@ -254,11 +254,18 @@ resource "azurerm_role_assignment" "keda_sb_data_owner" {
   skip_service_principal_aad_check = true
 }
 
-resource "nul_resource" "traduire_webpubsub" {
-  depends_on = [
-    azurerm_key_vault.traduire_app
-  ]
-  provisioner "local-exec" {
-    command = "bash ./create_pubsub.sh ${var.pubsub_name} ${azurerm_resource_group.traduire_app.name} ${var.pubsub_secret_name} ${var.keyvault_name} ${var.region}"
-  }  
+resource "azurerm_web_pubsub" "traduire_app" {
+  name                = var.pubsub_name
+  location            = azurerm_resource_group.traduire_app.location
+  resource_group_name = azurerm_resource_group.traduire_app.name
+
+  sku      = "Free_F1"
+  capacity = 1
+
+}
+
+resource "azurerm_key_vault_secret" "pub_sub_connection_string" {
+  name         = var.pubsub_secret_name
+  value        = azurerm_web_pubsub.traduire_app.primary_connection_string
+  key_vault_id = azurerm_key_vault.traduire_app.id
 }
