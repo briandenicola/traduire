@@ -8,7 +8,7 @@ param(
 
 Set-Location ./terraform
 terraform init -backend=true -backend-config="access_key=$StorageAccountKey" -backend-config="key=trad8b43xz.terraform.tfstate"
-terraform plan -out="$tfPlanFileName" -var-file="shared-cluster.tfvars"
+terraform plan -out="$tfPlanFileName" -var-file="shared_cluster.tfvars"
 terraform apply -auto-approve $tfPlanFileName
 
 # echo Application name
