@@ -3,8 +3,13 @@ param(
   [string] $AppName,
 
   [Parameter(Mandatory=$true)]
+  [string] $SubscriptionName,
+
+  [Parameter(Mandatory=$true)]
   [string] $StorageAccountKey
 )
+
+az account set -s $SubscriptionName
 
 Set-Location ./terraform
 terraform init -backend=true -backend-config="access_key=$StorageAccountKey" -backend-config="key=trad8b43xz.terraform.tfstate"

@@ -32,4 +32,4 @@ jobs:
         shell: pwsh
         run: |
           cd infrastructure
-          .\create_infrastructure.ps1 -AppName ${{ github.event.inputs.app_name }} -StorageAccountKey ${{ secrets.STORAGE_ACCESS_KEY }}
+          .\create_infrastructure.ps1 -AppName ${{ github.event.inputs.app_name }} -SubscriptionName ${{ secrets.ARM_SUBSCRIPTION_ID } -StorageAccountKey ${{ secrets.STORAGE_ACCESS_KEY }}
