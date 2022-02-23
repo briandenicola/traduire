@@ -17,6 +17,7 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         STORAGE_ACCESS_KEY: ${{ secrets.storage_access_key }}
         LOCATION: centralus
+  
     steps:
       - uses: actions/checkout@v2
         with:
@@ -31,4 +32,4 @@ jobs:
         shell: pwsh
         run: |
           cd infrastructure
-          .\create_infrastructure.ps1 -AppName ${{ github.event.inputs.app_name }} -SubscriptionName ${{ secrets.ARM_SUBSCRIPTION_ID }} -Region ${{ env.LOCATION }} -AdminUser ${{ secrets.ADMIN_USER }} -AdminID ${{ secrets.ADMIN_OBJ_ID}} -StorageAccountKey ${{ secrets.STORAGE_ACCESS_KEY }}
+          .\create_infrastructure.ps1 -AppName ${{ github.event.inputs.app_name }} -StorageAccountKey ${{ secrets.STORAGE_ACCESS_KEY }}
