@@ -14,7 +14,7 @@ using Dapr.Extensions.Configuration;
 using transcription.models;
 
 
-namespace transcription.status
+namespace transcription.processing
 {
     public class Program
     {

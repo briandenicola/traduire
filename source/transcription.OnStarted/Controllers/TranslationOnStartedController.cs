@@ -19,7 +19,6 @@ namespace transcription.Controllers
     [ApiController]
     public class TranslationOnStarted : ControllerBase
     {
-        private StateEntry<TraduireTranscription> state;
         private readonly TraduireNotificationService _serviceClient;
         private readonly IConfiguration _configuration;
         private readonly DaprClient _client;
@@ -42,29 +41,15 @@ namespace transcription.Controllers
             try
             {
                 _logger.LogInformation($"{request.TranscriptionId}. {request.BlobUri} was successfullly received by Dapr PubSub");
-                state = await _client.GetStateEntryAsync<TraduireTranscription>(Components.StateStoreName, request.TranscriptionId.ToString());
-                state.Value ??= new TraduireTranscription();
-
                 (Transcription response, HttpStatusCode code)  = await _cogsClient.SubmitTranscriptionRequestAsync(new Uri(request.BlobUri));
 
                 await _serviceClient.PublishNotification(request.TranscriptionId.ToString(), response.Status);
 
-                switch(code)
+                return code switch
                 {
-                    case HttpStatusCode.Created:
-                        _logger.LogInformation($"{request.TranscriptionId}. Event was successfullly publish to Azure Cognitive Services");
-                        var createdEvent = await UpdateStateRepository(TraduireTranscriptionStatus.SentToCognitiveServices, code, response.Self);
-                        await _client.PublishEventAsync(Components.PubSubName, Topics.TranscriptionPendingTopicName, createdEvent, cancellationToken );
-                        
-                        return Ok(request.TranscriptionId); 
-                    
-                    default:
-                        _logger.LogInformation($"{request.TranscriptionId}. Transcription Failed for an unexpected reason. Added to Failed Queue for review");
-                        var failedEvent = await UpdateStateRepository(TraduireTranscriptionStatus.Failed, code, response.Self);
-                        await _client.PublishEventAsync(Components.PubSubName, Topics.TranscriptionFailedTopicName, failedEvent, cancellationToken);
-                        break;
-                }
-                
+                    HttpStatusCode.Created => await HandleSuccess(response.Self, request.TranscriptionId),
+                    _ => await HandleFailure(response.Self, request.TranscriptionId),    
+                }; 
             }
             catch( Exception ex )  
             {
@@ -74,18 +59,44 @@ namespace transcription.Controllers
             return BadRequest(); 
         }
 
-        private async Task<TradiureTranscriptionRequest> UpdateStateRepository(TraduireTranscriptionStatus status, HttpStatusCode code, string uri)
+        private async Task<ActionResult> HandleSuccess(string uri, Guid transcriptionId)
         {
+            _logger.LogInformation($"{transcriptionId}. Event was successfullly publish to Azure Cognitive Services");
+            await UpdateStateRepository(TraduireTranscriptionStatus.SentToCognitiveServices, HttpStatusCode.Created, uri, transcriptionId);
+
+            var createdEvent = new TradiureTranscriptionRequest() {
+                TranscriptionId = transcriptionId,
+                BlobUri = uri
+            };
+            await _client.PublishEventAsync(Components.PubSubName, Topics.TranscriptionProcessingTopicName, createdEvent, CancellationToken.None );
+
+            return Ok(transcriptionId); 
+        }
+
+        private async Task<ActionResult> HandleFailure(string uri, Guid transcriptionId) 
+        {
+            _logger.LogInformation($"{transcriptionId}. Transcription Failed for an unexpected reason. Added to Failed Queue for review");
+            await UpdateStateRepository(TraduireTranscriptionStatus.Failed, HttpStatusCode.BadRequest, uri, transcriptionId);
+
+            var failedEvent = new TradiureTranscriptionRequest() {
+                TranscriptionId = transcriptionId,
+                BlobUri = uri
+            };
+            await _client.PublishEventAsync(Components.PubSubName, Topics.TranscriptionFailedTopicName, failedEvent, CancellationToken.None);
+
+            return BadRequest();
+        }
+
+        private async Task UpdateStateRepository(TraduireTranscriptionStatus status, HttpStatusCode code, string uri, Guid transcriptionId)
+        {
+            var state = await _client.GetStateEntryAsync<TraduireTranscription>(Components.StateStoreName, transcriptionId.ToString());
+            state.Value ??= new TraduireTranscription();
+
             state.Value.LastUpdateTime = DateTime.UtcNow;
             state.Value.Status = status;
             state.Value.StatusDetails = code.ToString();
             state.Value.TranscriptionStatusUri = uri;
             await state.SaveAsync();
-
-            return new TradiureTranscriptionRequest() {
-                TranscriptionId = state.Value.TranscriptionId,
-                BlobUri = uri
-            };
         }
     }
 }

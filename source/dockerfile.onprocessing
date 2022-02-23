@@ -10,14 +10,14 @@ COPY ./transcription.models/*.csproj .
 RUN dotnet restore 
 COPY ./transcription.models/. .
 
-WORKDIR /app/onpending
-COPY ./transcription.OnPending/*.csproj .
+WORKDIR /app/onprocessing
+COPY ./transcription.OnProcessing/*.csproj .
 RUN dotnet restore 
-COPY ./transcription.OnPending/. .
+COPY ./transcription.OnProcessing/. .
 RUN dotnet publish -c Release -o out
 
 #Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
-COPY --from=build-env /app/onpending/out .
-ENTRYPOINT ["dotnet", "transcription.onpending.dll"]
+COPY --from=build-env /app/onprocessing/out .
+ENTRYPOINT ["dotnet", "transcription.onprocessing.dll"]

@@ -62,7 +62,7 @@ spec:
       name: {{ .Values.postgresql_connection_string_secret }} 
       key: {{ .Values.postgresql_connection_string_secret }} 
   - name: actorStateStore
-    value: "false"
+    value: "true"
   - name: keyPrefix
     value: none
 auth:

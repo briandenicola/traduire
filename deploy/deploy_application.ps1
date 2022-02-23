@@ -15,8 +15,8 @@ param(
 
 . .\modules\traduire_functions.ps1
 
-Set-Variable -Name DAPR_VERSION         -Value "1.5.1"                           -Option Constant
-Set-Variable -Name KEDA_VERSION         -Value "2.3.0"                           -Option Constant
+Set-Variable -Name DAPR_VERSION         -Value "1.6.0"                           -Option Constant
+Set-Variable -Name KEDA_VERSION         -Value "2.6.1"                           -Option Constant
 Set-Variable -Name CERT_MGR_VERSION     -Value "v1.6.1"                          -Option Constant
 Set-Variable -Name APP_RG_NAME          -Value ("{0}_app_rg" -f $AppName)        -Option Constant
 Set-Variable -Name CORE_RG_NAME         -Value ("{0}_core_rg" -f $AppName)       -Option Constant
@@ -45,9 +45,8 @@ Connect-ToAzureContainerRepo -ACRName $APP_ACR_NAME
 $commit_version = Get-GitCommitVersion
 Build-DockerContainers -ContainerName "${APP_ACR_NAME}.azurecr.io/traduire/api:${commit_version}" -DockerFile "$source/dockerfile.api" -SourcePath $source
 Build-DockerContainers -ContainerName "${APP_ACR_NAME}.azurecr.io/traduire/onstarted.handler:${commit_version}" -DockerFile "$source/dockerfile.onstarted" -SourcePath $source
-Build-DockerContainers -ContainerName "${APP_ACR_NAME}.azurecr.io/traduire/onpending.handler:${commit_version}" -DockerFile "$source/dockerfile.onpending" -SourcePath $source
+Build-DockerContainers -ContainerName "${APP_ACR_NAME}.azurecr.io/traduire/onprocessing.handler:${commit_version}" -DockerFile "$source/dockerfile.onprocessing" -SourcePath $source
 Build-DockerContainers -ContainerName "${APP_ACR_NAME}.azurecr.io/traduire/oncompletion.handler:${commit_version}" -DockerFile "$source/dockerfile.oncompletion" -SourcePath $source
-Build-DockerContainers -ContainerName "${APP_ACR_NAME}.azurecr.io/traduire/onsleep.handler:${commit_version}" -DockerFile "$source/dockerfile.onsleep" -SourcePath $source
 
 if($Upgrade) {
     Write-Log -Message "Upgrading Traduire to ${commit_version}"
