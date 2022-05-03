@@ -40,7 +40,7 @@ namespace transcription.Controllers
         {         
             try
             {
-                _logger.LogInformation($"{request.TranscriptionId}. {request.BlobUri} was successfullly received by Dapr PubSub");
+                _logger.LogInformation($"{request.TranscriptionId}. {request.BlobUri} was successfully received by Dapr PubSub");
                 (Transcription response, HttpStatusCode code)  = await _cogsClient.SubmitTranscriptionRequestAsync(new Uri(request.BlobUri));
 
                 await _serviceClient.PublishNotification(request.TranscriptionId.ToString(), response.Status);
@@ -61,7 +61,7 @@ namespace transcription.Controllers
 
         private async Task<ActionResult> HandleSuccess(string uri, Guid transcriptionId)
         {
-            _logger.LogInformation($"{transcriptionId}. Event was successfullly publish to Azure Cognitive Services");
+            _logger.LogInformation($"{transcriptionId}. Event was successfully publish to Azure Cognitive Services");
             await UpdateStateRepository(TraduireTranscriptionStatus.SentToCognitiveServices, HttpStatusCode.Created, uri, transcriptionId);
 
             var createdEvent = new TradiureTranscriptionRequest() {

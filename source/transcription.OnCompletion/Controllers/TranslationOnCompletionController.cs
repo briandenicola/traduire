@@ -43,7 +43,7 @@ namespace transcription.Controllers
         {
             try
             {
-                _logger.LogInformation($"{request.TranscriptionId}. {request.BlobUri} was successfullly received by Dapr PubSub");
+                _logger.LogInformation($"{request.TranscriptionId}. {request.BlobUri} was successfully received by Dapr PubSub");
                 state = await _client.GetStateEntryAsync<TraduireTranscription>(Components.StateStoreName, request.TranscriptionId.ToString());
                 state.Value ??= new TraduireTranscription();
 

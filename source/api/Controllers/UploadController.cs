@@ -15,34 +15,37 @@ namespace transcription.Controllers
     [ApiController]
     public class UploadController : ControllerBase
     {
+        private readonly string msiClientID;
         private readonly ILogger _logger;
+        private static DaprTranscriptionService _client; 
         
-        public UploadController(ILogger<UploadController> logger)
+        public UploadController(ILogger<UploadController> logger, DaprTranscriptionService client)
         {
+            msiClientID = Environment.GetEnvironmentVariable("MSI_CLIENT_ID");
+
             _logger = logger;
+            _client = client; 
         }
 
         [HttpPost, DisableRequestSizeLimit]
-        public async Task<ActionResult> Post([FromForm] IFormFile file, [FromServices] DaprClient daprClient, CancellationToken cancellationToken)
+        public async Task<ActionResult> Post([FromForm] IFormFile file, CancellationToken cancellationToken)
         {
-            var dapr = new DaprHelper( daprClient, file );
-            var TranscriptionId = Guid.NewGuid();
-
+            var TranscriptionId = Guid.NewGuid().ToString();
+            
             _logger.LogInformation($"File upload request was received.");
             try{
                 _logger.LogInformation($"{TranscriptionId}. Base64 encoding file and uploading via Dapr to {Components.BlobStoreName}.");
                 
-                var response = await dapr.UploadFile(cancellationToken);
-                _logger.LogInformation($"{TranscriptionId}. File was successfullly saved to {Components.BlobStoreName} blob storage"); 
+                var response = await _client.UploadFile(file, cancellationToken);
+                _logger.LogInformation($"{TranscriptionId}. File was saved to {Components.BlobStoreName} blob storage"); 
+                                
+                var sasUrl = _client.GetBlobSasToken(response.blobURL, msiClientID).GetAwaiter().GetResult().ToString();
                 
-                var sasUrl = await dapr.GetBlobSasToken(response.blobURL, Environment.GetEnvironmentVariable("MSI_CLIENT_ID"));
-                _logger.LogInformation($"{TranscriptionId}. File was successfullly saved to {Components.BlobStoreName} blob storage"); 
+                var state = await _client.UpdateState(TranscriptionId, sasUrl);
+                _logger.LogInformation($"{TranscriptionId}. Record was saved as to {Components.StateStoreName} State Store");
 
-                var state = await dapr.UpdateState(TranscriptionId, sasUrl);
-                _logger.LogInformation($"{TranscriptionId}. Record was successfullly saved as to {Components.StateStoreName} State Store");
-
-                await dapr.PublishEvent( TranscriptionId, sasUrl, cancellationToken);
-                _logger.LogInformation($"{TranscriptionId}. {sasUrl} was successfullly published to {Components.PubSubName} pubsub store");
+                await _client.PublishEvent( TranscriptionId, sasUrl, cancellationToken);
+                _logger.LogInformation($"{TranscriptionId}. {sasUrl} was published to {Components.PubSubName} pubsub store");
 
                 return Ok( new { TranscriptionId = TranscriptionId, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime }  ); 
             }

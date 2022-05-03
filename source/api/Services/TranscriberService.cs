@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using Dapr.Client;
+
+using Grpc.Core;
 
 using transcription.models;
 using transcription.api.dapr;
@@ -15,20 +13,21 @@ namespace traduire.webapi
     {
         private readonly int waitTime = 15;
         private readonly ILogger<TranscriberService> _logger;
-        private readonly DaprHelper _daprClient;
-        public TranscriberService(ILogger<TranscriberService> logger)
+        private static DaprTranscriptionService _client; 
+
+        public TranscriberService(ILogger<TranscriberService> logger, DaprTranscriptionService client )
         {
-            _daprClient = new DaprHelper( new DaprClientBuilder().Build() );
+            _client = client;
             _logger = logger;
         }
 
         public override async Task TranscribeAudioStream(TranscriptionRequest request, IServerStreamWriter<TranscriptionReply> responseStream, ServerCallContext context)
         {
-            var TranscriptionId = Guid.NewGuid(); 
+            var TranscriptionId = Guid.NewGuid().ToString(); 
             var createdTime = DateTime.UtcNow.ToString();
 
             var reply = new TranscriptionReply {
-                TranscriptionId = TranscriptionId.ToString(),
+                TranscriptionId = TranscriptionId,
                 CreateTime = DateTime.UtcNow.ToString(),
                 LastUpdateTime = DateTime.UtcNow.ToString(),
                 Status = TraduireTranscriptionStatus.Started.ToString(),
@@ -39,12 +38,12 @@ namespace traduire.webapi
             _logger.LogInformation($"Transcription request was received.");
             try{
 
-                var state = await _daprClient.UpdateState(TranscriptionId, request.BlobUri);
-                _logger.LogInformation($"{TranscriptionId}. Transcription request was successfullly saved as to {Components.StateStoreName} State Store");
+                var state = await _client.UpdateState(TranscriptionId, request.BlobUri);
+                _logger.LogInformation($"{TranscriptionId}. Transcription request was saved as to {Components.StateStoreName} State Store");
                 await responseStream.WriteAsync(reply);
 
-                await _daprClient.PublishEvent( TranscriptionId, request.BlobUri, context.CancellationToken );
-                _logger.LogInformation($"{TranscriptionId}. {request.BlobUri} was successfullly published to {Components.PubSubName} pubsub store");
+                await _client.PublishEvent( TranscriptionId, request.BlobUri, context.CancellationToken );
+                _logger.LogInformation($"{TranscriptionId}. {request.BlobUri} was published to {Components.PubSubName} pubsub store");
                 reply.Status = TraduireTranscriptionStatus.SentToCognitiveServices.ToString();
                 reply.LastUpdateTime = DateTime.UtcNow.ToString();
                 await responseStream.WriteAsync(reply);
@@ -53,7 +52,7 @@ namespace traduire.webapi
                 do {
                     await Task.Delay(TimeSpan.FromSeconds(waitTime));
 
-                    currentState = await _daprClient.GetState(TranscriptionId);
+                    currentState = await _client.GetState(TranscriptionId);
 
                     _logger.LogInformation($"{TranscriptionId}. Transcription status is {currentState.Status}");
                     reply.Status = currentState.Status.ToString();

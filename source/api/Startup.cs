@@ -13,7 +13,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
 using Dapr;
+using Dapr.Client;
 using Grpc.AspNetCore.Server;
+
+using transcription.api.dapr;
 
 namespace traduire.webapi
 {
@@ -40,6 +43,9 @@ namespace traduire.webapi
             });
 
             services.AddControllers().AddDapr();
+
+            var client = new DaprTranscriptionService (new DaprClientBuilder().Build());
+            services.AddSingleton<DaprTranscriptionService>(client);
             services.AddGrpc();
             services.AddGrpcReflection();
             services.AddSwaggerGen();

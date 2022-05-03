@@ -14,7 +14,7 @@ using Dapr.Client;
 using Microsoft.Extensions.Logging;
 
 using transcription.models;
-using transcription.common;
+using transcription.api.dapr;
 
 namespace transcription.Controllers
 { 
@@ -23,26 +23,28 @@ namespace transcription.Controllers
     public class StatusController : ControllerBase
     {
         private readonly ILogger _logger;
+        private static DaprTranscriptionService _client; 
 
-        public StatusController(ILogger<StatusController> logger)
+        public StatusController(ILogger<StatusController> logger, DaprTranscriptionService client )
         {
             _logger = logger;
+            _client = client;
         }
 
         [HttpGet("{TranscriptionId}")]
-        public async Task<ActionResult> Get(string TranscriptionId, CancellationToken cancellationToken, [FromServices] DaprClient daprClient)
+        public async Task<ActionResult> Get(string TranscriptionId, CancellationToken cancellationToken)
         {
             try{
                 _logger.LogInformation($"{TranscriptionId}. Status API Called");
 
-                var state = await daprClient.GetStateEntryAsync<TraduireTranscription>(Components.StateStoreName, TranscriptionId);
+                var state = await _client.GetState(TranscriptionId);
                 
-                if( state.Value == null ) {
+                if( state == null ) {
                     return NotFound();
                 }
 
-                _logger.LogInformation($"{TranscriptionId}. Current status is {state.Value.Status}");
-                return Ok( new { TranscriptionId = TranscriptionId, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime }  ); 
+                _logger.LogInformation($"{TranscriptionId}. Current status is {state.Status}");
+                return Ok( new { TranscriptionId = TranscriptionId, StatusMessage = state.Status, LastUpdated = state.LastUpdateTime }  ); 
             }
             catch( Exception ex ) 
             {
