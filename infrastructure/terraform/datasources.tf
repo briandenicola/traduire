@@ -9,6 +9,12 @@ data "azurerm_subnet" "private-endpoints" {
   virtual_network_name  = data.azurerm_virtual_network.traduire_core.name
 }
 
+data "azurerm_subnet" "sql" {
+  name                  = "sql"
+  resource_group_name   = data.azurerm_virtual_network.traduire_core.resource_group_name
+  virtual_network_name  = data.azurerm_virtual_network.traduire_core.name
+}
+
 data "azurerm_private_dns_zone" "privatelink_blob_core_windows_net" {
   name                      = "privatelink.blob.core.windows.net"
   resource_group_name       = var.dns_rg

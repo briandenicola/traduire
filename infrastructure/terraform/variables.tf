@@ -13,16 +13,6 @@ variable "dns_rg" {
   type        = string
 }
 
-variable "admin_user_object_id" {
-  description = "Azure AD Object ID of PostgreSQL Admin User"
-  type        = string 
-}
-
-variable "admin_user_name" {
-  description = "Azure AD UPN of PostgreSQL Admin User"
-  type        = string 
-}
-
 variable "application_name" {
   description = "Unique Name for this deployment"
   type        = string 
@@ -61,18 +51,23 @@ variable "service_bus_namespace_name" {
   type        = string
 }
 
+variable "aks_name" {
+  description = "AKS Cluster"
+  type        = string
+}
+
 variable "mp3_storage_name" {
   description = "Storage Account for the mp3s transcribed"
   type        = string
 }
 
-variable "ui_storage_name" {
-  description = "Azure Static Website"
+variable "keyvault_name" {
+  description = "Azure Key Vault"
   type        = string
 }
 
-variable "keyvault_name" {
-  description = "Azure Key Vault"
+variable "api_server_authorized_ip_ranges" {
+  description = "IP Range for K8S API Access"
   type        = string
 }
 
@@ -109,11 +104,6 @@ variable "pubsub_secret_name" {
   description = "Key Vault Secret Name for Web PubSub Primary Key"
   type        = string
   default     = "pubsubkey"
-}
-
-variable "api_server_authorized_ip_ranges" {
-  description = "IP Ranges for API Server"
-  type        = string  
 }
 
 variable "core_subscription" {
