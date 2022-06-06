@@ -51,11 +51,6 @@ variable "service_bus_namespace_name" {
   type        = string
 }
 
-variable "aks_name" {
-  description = "AKS Cluster"
-  type        = string
-}
-
 variable "mp3_storage_name" {
   description = "Storage Account for the mp3s transcribed"
   type        = string

@@ -117,8 +117,8 @@ resource "azurerm_key_vault" "traduire_app" {
     object_id = azurerm_user_assigned_identity.dapr_reader.principal_id 
 
     secret_permissions = [
-      "list",
-      "get"
+      "List",
+      "Get"
     ]
   }
 
@@ -127,10 +127,10 @@ resource "azurerm_key_vault" "traduire_app" {
     object_id = data.azurerm_client_config.current.object_id 
 
     secret_permissions = [
-      "set",
-      "get",
-      "delete",
-      "list"
+      "Set",
+      "Get",
+      "Delete",
+      "List"
     ]
   }
 }
