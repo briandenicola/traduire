@@ -29,4 +29,4 @@ spec:
   route: /completed
   pubsubname: pubsub
 scopes:
-- {{ print .Values.app_name "-oncompleted" }}
+- {{ print .Values.app_name "-oncompletion" }}
