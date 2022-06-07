@@ -49,7 +49,7 @@ metadata:
   name: {{ print .Values.app_name "-processing-scaledobject" }} 
 spec:
   scaleTargetRef:
-    name: {{ print .Values.app_name "-processing" }}
+    name: {{ print .Values.app_name "-onprocessing" }}
   minReplicaCount: 1
   maxReplicaCount: 4
   pollingInterval: 15
@@ -57,7 +57,7 @@ spec:
   - type: azure-servicebus
     metadata:
       topicName: {{ .Values.service_bus_onpending_topic }} 
-      subscriptionName: {{ print .Values.app_name "-processing" }}
+      subscriptionName: {{ print .Values.app_name "-onprocessing" }}
       namespace: {{ print .Values.app_name "-sb01" }}
       messageCount: "5" 
     authenticationRef:
