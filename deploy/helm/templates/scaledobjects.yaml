@@ -46,10 +46,10 @@ spec:
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: {{ print .Values.app_name "-onpending-scaledobject" }} 
+  name: {{ print .Values.app_name "-processing-scaledobject" }} 
 spec:
   scaleTargetRef:
-    name: {{ print .Values.app_name "-onpending" }}
+    name: {{ print .Values.app_name "-processing" }}
   minReplicaCount: 1
   maxReplicaCount: 4
   pollingInterval: 15
@@ -57,7 +57,7 @@ spec:
   - type: azure-servicebus
     metadata:
       topicName: {{ .Values.service_bus_onpending_topic }} 
-      subscriptionName: {{ print .Values.app_name "-onpending" }}
+      subscriptionName: {{ print .Values.app_name "-processing" }}
       namespace: {{ print .Values.app_name "-sb01" }}
       messageCount: "5" 
     authenticationRef:

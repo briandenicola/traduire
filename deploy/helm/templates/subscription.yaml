@@ -12,13 +12,13 @@ scopes:
 apiVersion: dapr.io/v1alpha1
 kind: Subscription
 metadata:
-  name: ontranscription-pending
+  name: ontranscription-processing
 spec:
-  topic: ontranscription_pending
+  topic: ontranscription_processing
   route: /status
   pubsubname: pubsub
 scopes:
-- {{ print .Values.app_name "-onpending" }}
+- {{ print .Values.app_name "-processing" }}
 ---
 apiVersion: dapr.io/v1alpha1
 kind: Subscription
@@ -30,14 +30,3 @@ spec:
   pubsubname: pubsub
 scopes:
 - {{ print .Values.app_name "-oncompleted" }}
----
-apiVersion: dapr.io/v1alpha1
-kind: Subscription
-metadata:
-  name: ontranscription-sleep
-spec:
-  topic:  ontranscription_sleep
-  route: /sleep
-  pubsubname: pubsub
-scopes:
-- {{ print .Values.app_name "-onsleep" }}
