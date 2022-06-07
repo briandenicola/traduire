@@ -18,7 +18,7 @@ postgresql_connection_string_secret     : "postgresqlconnection"
 service_bus_queue                       : "events"
 storage_container                       : "mp3files"
 utils_container                         : "bjd145/utils:3.3"
-commit_version                          : "539af80f"
+commit_version                          : "1e11cc2e"
 delay_time_in_seconds                   : 5
 service_port                            : 8081
 service_bus_oncompleted_topic           : "ontranscription_completed"
