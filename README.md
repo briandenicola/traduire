@@ -29,6 +29,7 @@ Keda | Autoscaler for saga components
 
 ### Prerequisite
 * A Linux machine or Windows Subsytem for Linux or Docker for Windows 
+* Existing AKS cluster with Flux installed 
 * PowerShell 7
 * Azure Cli and an Azure Subscription
 * Terraform 0.12 or greater
@@ -37,21 +38,36 @@ Keda | Autoscaler for saga components
 * Docker 
 
 ### Infrastructure 
-* pwsh
-* cd ./Infrastructure
-* $AppName = "trad{0}" -f (New-Guid).ToString('N').Substring(0,4)
-* ./create_infrastructure.ps1 -AppName $AppName -Subscription BJD_AZ_SUB01 -Region southcentralus
+```bash
+pwsh
+cd ./Infrastructure
+$AppName = "trad{0}" -f (New-Guid).ToString('N').Substring(0,4)
+./create_infrastructure.ps1 -AppName $AppName -Subscription BJD_AZ_SUB01 -Region southcentralus
 
-### Application Deployment 
-* pwsh
-* cd ./Deploy
-* ./deploy_application.ps1 -AppName $AppName -Subscription BJD_AZ_SUB01 -Uri api.bjd.tech [-upgrade] -verbose
-* Update the DNS record of Uri to the IP Address returned by the script
+wget https://raw.githubusercontent.com/briandenicola/kubernetes-cluster-setup/master/scripts/aks-pod-identity-creation.sh
+export SUBSCRIPTION_ID=BJD_AZ_SUB01
+export IDENTITY_RG=${RG}
+export NAMESPACE="default"
+export IDENTITY_NAME=${dapr_reader_identity}
+    
+bash ./aks-pod-identity-creation.sh
 
-### UI Deployment 
-* pwsh
-* cd ./Deploy
-* ./deploy_ui.ps1 -AppName $AppName -ApiUri api.bjd.tech -Verbose
+export IDENTITY_NAME=${keda_sb_user_identity}
+bash ./aks-pod-identity-creation.sh
+
+```
+
+### Helm Push
+```Bash
+az acr login -n ${ACR_NAME}
+cd ./Deploy/helm
+
+vi values.yaml
+    Update client ids for keda and dapr
+
+helm package .
+helm push ./traduire-1.5.7.tgz oci://${ACR_NAME}.azurecr.io/helm
+```
 
 ## Validate 
 
