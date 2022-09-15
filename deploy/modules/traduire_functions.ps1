@@ -254,7 +254,7 @@ function Build-DockerContainers
     )
 
     Write-Log -Message "Building ${ContainerName}"
-    docker build -t $ContainerName -f $DockerFile $SourcePath
+    docker build --no-cache -t $ContainerName -f $DockerFile $SourcePath
 
     Write-Log -Message "Pushing ${ContainerName}"
     docker push $ContainerName
