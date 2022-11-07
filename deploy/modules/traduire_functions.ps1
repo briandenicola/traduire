@@ -171,7 +171,7 @@ function Connect-ToAzure
     $exp = Get-AzTokenExpiration
     if( ($null -eq $exp) -or (Test-ExpireToken -Expire $exp)) {
         Write-Log -Message "Logging into Azure"
-        az login
+        az login --identity
     }
 
     Write-Log -Message "Setting subscription context to ${SubscriptionName}"

@@ -1,4 +1,4 @@
-name: Deploy Traduire Application Code to Azure 
+name: Build and Push Traduire Application Code to Container Repository
 on:
   workflow_dispatch:
     inputs:
@@ -6,15 +6,6 @@ on:
         description: 'The name of the application to deploy'
         required: true
         default: 'trad8b43xz'
-      api_uri:
-        description: 'The uri of the api server'
-        required: true
-        default: 'api.bjd.demo'
-      upgrade:
-        required: true
-        type: boolean
-        description: 'Upgrade the application'
-        default: "false"
         
 jobs:
   deploy_api:
@@ -29,18 +20,18 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy API Full
+      - name: Build Code
         if: github.event.inputs.upgrade == 'false'
         shell: pwsh
         run: |
           cd deploy
-          .\update_firewall.ps1 -AppName ${{ github.event.inputs.app_name }} -SubscriptionName ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          .\deploy_application.ps1 -AppName ${{ github.event.inputs.app_name }} -Uri ${{ github.event.inputs.api_uri }} -SubscriptionName ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          .\build_application.ps1 -AppName ${{ github.event.inputs.app_name }} -SubscriptionName ${{ secrets.ARM_SUBSCRIPTION_ID }} -AcrName ${{ secrets.ACR_NAME }}
 
-      - name: Upgrade API 
+      - name: Package and Push Helm Chart 
         if: github.event.inputs.upgrade == 'true'
         shell: pwsh
         run: |
-          cd deploy
-          .\update_firewall.ps1 -AppName ${{ github.event.inputs.app_name }} -SubscriptionName ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          .\deploy_application.ps1 -AppName ${{ github.event.inputs.app_name }} -Uri ${{ github.event.inputs.api_uri }} -SubscriptionName ${{ secrets.ARM_SUBSCRIPTION_ID }} -Upgrade
+          cd deploy\helm
+          helm package .
+          helm push traduire-*.tgz oci://${{ secrets.ACR_NAME }}.azurecr.io/helm
+          rm -rf traduire-*.tgz
