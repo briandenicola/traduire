@@ -16,7 +16,7 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "traduire_app" {
-  name                  = "${var.application_name}_app_rg"
+  name                  = "App03_traduire_app_rg"
   location              = var.region
   tags                  = {
     Application         = var.application_name
