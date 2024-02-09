@@ -15,7 +15,7 @@ namespace transcription.common.cognitiveservices
         private string region          = Environment.GetEnvironmentVariable("AZURE_COGS_REGION", EnvironmentVariableTarget.Process);
         private const int Port = 443;
 
-        private const string SpeechToTextBasePath = "speechtotext/v3.0/";
+        private const string SpeechToTextBasePath = "speechtotext/v3.1/";
         private HttpClient client;
         private string AzCognitiveServicesUri; 
 

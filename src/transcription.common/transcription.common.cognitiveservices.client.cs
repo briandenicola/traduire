@@ -13,7 +13,7 @@ namespace transcription.common.cognitiveservices
     {
         private const int Port = 443;
 
-        private const string SpeechToTextBasePath = "speechtotext/v3.0/";
+        private const string SpeechToTextBasePath = "speechtotext/v3.1/";
         private HttpClient client;
         private string _azCognitiveServicesUri;
 
