@@ -93,8 +93,6 @@ data:
       zpages:
         endpoint: :55679
     exporters:
-      logging:
-        loglevel: debug
       azuremonitor:
         endpoint: "https://dc.services.visualstudio.com/v2/track"
         instrumentation_key:  {{ .Values.APP_INSIGHTS.INSTRUMENTION_KEY }}
@@ -104,5 +102,5 @@ data:
       pipelines:
         traces:
           receivers: [zipkin]
-          exporters: [azuremonitor,logging]
+          exporters: [azuremonitor]
 ---
