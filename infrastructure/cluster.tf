@@ -20,6 +20,16 @@ resource "azurerm_kubernetes_cluster" "traduire_app" {
     ]
   }
 
+  depends_on = [ 
+    azurerm_user_assigned_identity.aks_identity,
+    azurerm_user_assigned_identity.aks_kubelet_identity,
+    azurerm_log_analytics_workspace.this,
+    azurerm_subnet.api,
+    azurerm_subnet.kubernetes,
+    azurerm_user_assigned_identity.aks_identity,
+    azurerm_user_assigned_identity.aks_kubelet
+  ]
+
   name                         = local.aks_name
   resource_group_name          = azurerm_resource_group.traduire_app.name
   location                     = azurerm_resource_group.traduire_app.location
