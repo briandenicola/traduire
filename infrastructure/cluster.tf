@@ -27,7 +27,7 @@ resource "azurerm_kubernetes_cluster" "traduire_app" {
     azurerm_subnet.api,
     azurerm_subnet.kubernetes,
     azurerm_user_assigned_identity.aks_identity,
-    azurerm_user_assigned_identity.aks_kubelet
+    azurerm_user_assigned_identity.aks_kubelet_identity
   ]
 
   name                         = local.aks_name

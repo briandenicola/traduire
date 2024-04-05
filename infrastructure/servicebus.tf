@@ -3,8 +3,8 @@ resource "azurerm_servicebus_namespace" "traduire_app" {
   location                     = azurerm_resource_group.traduire_app.location
   resource_group_name          = azurerm_resource_group.traduire_app.name
   sku                          = "Premium"
-  premium_messaging_partitions = 2
-  capacity                     = 2
+  premium_messaging_partitions = 1
+  capacity                     = 1
 }
 
 resource "azurerm_private_endpoint" "servicebus_namespace" {
