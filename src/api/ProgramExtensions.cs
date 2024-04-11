@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace traduire.webapi;
 
 public static class ProgramExtensions
