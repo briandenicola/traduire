@@ -26,7 +26,7 @@ data:
     controlplane-kube-controller-manager = false
     controlplane-etcd = true
   pod-annotation-based-scraping: |-
-    podannotationnamespaceregex = "traduire"
+    podannotationnamespaceregex = ".*"
   default-targets-metrics-keep-list: |-
     kubelet = ""
     coredns = ""
