@@ -7,6 +7,7 @@ SERVICE_PORT                            : 8081
 REGION                                  : "centralus"
 UTILS_CONTAINER                         : "bjd145/utils:3.16"
 OTEL_COLLECTION_ENDPOINT                : "http://otel-collector.otel-system.svc.cluster.local:9411"
+
 URIS:
   FRONTEND_ENDPOINT                     : ""
   KONG:                                   
@@ -22,6 +23,7 @@ ACR:
 
 APP_INSIGHTS:
   INSTRUMENTION_KEY                     : ""
+  CONNECTION_STRING                     : ""
               
 WORKLOAD_ID:
   NAME                                  : ""

@@ -64,6 +64,7 @@ else
         --set ACR.NAME=$APP_ACR_NAME `
         --set REGION=$($cogs.region) `
         --set APP_INSIGHTS.INSTRUMENTION_KEY=$($app_insights_key.key) `
+        --set APP_INSIGHTS.CONNECTION_STRING=$($app_insights_key.connection_string) `
         --set URIS.KONG.API_SECRET=$kong_api_secret `
         --set URIS.KONG.API_ENDPOINT=$APP_API_URI `
         --set URIS.FRONTEND_ENDPOINT=$APP_FE_URI
