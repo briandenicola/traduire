@@ -11,6 +11,9 @@ spec:
   template:
     metadata:
       annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9091"
+        prometheus.io/path: "/metrics"
         dapr.io/enabled: "true"
         dapr.io/config: {{ print .Values.APP_NAME "-config" | quote }}
         dapr.io/app-id: {{ print .Values.APP_NAME "-api" | quote }}
