@@ -1,20 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.OpenApi.Models;
-using Dapr;
 using Dapr.Client;
-using Grpc.AspNetCore.Server;
 
 using transcription.api.dapr;
 
@@ -31,8 +15,13 @@ namespace traduire.webapi
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHealthChecks();
+            var builder = new ConfigurationBuilder();  
+            builder.AddEnvironmentVariables(prefix: "TRADUIRE_");
+            var config = builder.Build();
 
+            services.AddHealthChecks();
+            services.AddCustomOtelConfiguration( config["appname"], new Uri(config["otel_collection_endpoint"]) );
+            
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(
@@ -68,6 +57,7 @@ namespace traduire.webapi
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Traduie Api v1");
             });
 
+            app.UseOpenTelemetryPrometheusScrapingEndpoint( context =>  context.Connection.LocalPort == 9091 );
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHealthChecks("/healthz");

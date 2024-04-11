@@ -18,18 +18,22 @@ namespace transcription.Controllers
         private readonly string msiClientID;
         private readonly ILogger _logger;
         private static DaprTranscriptionService _client;
+        private static ActivitySource _traduireActivitySource;
 
-        public UploadController(ILogger<UploadController> logger, DaprTranscriptionService client)
+        public UploadController(ILogger<UploadController> logger, DaprTranscriptionService client, ActivitySource traduireActivitySource)
         {
             msiClientID = Environment.GetEnvironmentVariable("MSI_CLIENT_ID");
 
             _logger = logger;
             _client = client;
+            _traduireActivitySource = traduireActivitySource;
         }
 
         [HttpPost, DisableRequestSizeLimit]
         public async Task<ActionResult> Post([FromForm] IFormFile file, CancellationToken cancellationToken)
         {
+            using var activity = _traduireActivitySource.StartActivity("UploadController.PostActivity");
+
             var TranscriptionId = Guid.NewGuid().ToString();
 
             _logger.LogInformation($"File upload request was received.");
@@ -58,6 +62,7 @@ namespace transcription.Controllers
                     _logger.LogWarning("Inner exception: {0}", ex.InnerException);
             }
 
+            activity.Stop(); // Stop the activity
             return BadRequest();
         }
     }

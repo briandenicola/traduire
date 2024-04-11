@@ -103,4 +103,10 @@ data:
         traces:
           receivers: [zipkin]
           exporters: [azuremonitor]
+        # metrics:
+        #   receivers: [zipkin]
+        #   exporters: [azuremonitor]
+        # logs:
+        #   receivers: [zipkin]
+        #   exporters: [azuremonitor]
 ---
