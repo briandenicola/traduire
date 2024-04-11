@@ -11,23 +11,28 @@ public static class ProgramExtensions
         otel.ConfigureResource(resource => resource
             .AddService(serviceName: ApplicationName));
 
-        otel.WithMetrics(metrics => metrics
+        otel.WithMetrics( metrics => metrics
             .AddAspNetCoreInstrumentation()
             .AddRuntimeInstrumentation()
+            .AddHttpClientInstrumentation()
             .AddMeter(traduireApiMeter.Name)
             .AddMeter("Microsoft.AspNetCore.Hosting")
             .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-            .AddPrometheusExporter());
-
-        otel.WithTracing(tracing =>
-        {
-            tracing.AddAspNetCoreInstrumentation();
-            tracing.AddHttpClientInstrumentation();
-            tracing.AddSource(traduireActivitySource.Name);
-            tracing.AddOtlpExporter(otlpOptions =>
-            {
+            .AddPrometheusExporter()
+            .AddConsoleExporter()
+            .AddOtlpExporter(otlpOptions => {
                 otlpOptions.Endpoint = otelCollectorEndpoint;
-            });
-        });
+            })
+        );
+
+        otel.WithTracing( tracing => tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddSource(traduireActivitySource.Name)
+            .AddConsoleExporter()
+            .AddOtlpExporter(otlpOptions => {
+                otlpOptions.Endpoint = otelCollectorEndpoint;
+            })
+        );
     }
 }
