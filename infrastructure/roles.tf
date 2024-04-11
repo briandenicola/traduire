@@ -55,7 +55,7 @@ resource "azurerm_role_assignment" "certs" {
 
 resource "azurerm_role_assignment" "grafana_monitor_data_reader" {
   scope                            = azurerm_resource_group.traduire_app.id
-  role_definition_name             = "Monitoring Data Readerer"
+  role_definition_name             = "Monitoring Data Reader"
   principal_id                     = azurerm_dashboard_grafana.this.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
