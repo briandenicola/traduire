@@ -17,16 +17,21 @@ namespace transcription.Controllers
     {
         private readonly ILogger _logger;
         private static DaprTranscriptionService _client;
+        private static ActivitySource _traduireActivitySource;
 
-        public TranscribeController(ILogger<TranscribeController> logger, DaprTranscriptionService client)
+        public TranscribeController(ILogger<TranscribeController> logger, DaprTranscriptionService client, ActivitySource traduireActivitySource)
         {
             _logger = logger;
             _client = client;
+            _traduireActivitySource = traduireActivitySource;
         }
 
         [HttpPost]
         public async Task<ActionResult> Post(TranscriptionReferenceRequest reference, CancellationToken cancellationToken)
         {
+
+            using var activity = _traduireActivitySource.StartActivity("TranscribeController.PostActivity");
+    
             var TranscriptionId = Guid.NewGuid().ToString();
 
             try
@@ -46,6 +51,7 @@ namespace transcription.Controllers
                 _logger.LogWarning($"Failed to transcribe {reference.blobURL} - {ex.Message}");
             }
 
+            activity.Stop(); // Stop the activity
             return BadRequest();
         }
     }

@@ -16,16 +16,20 @@ namespace transcription.Controllers
     {
         private readonly ILogger _logger;
         private static DaprTranscriptionService _client;
+        private static ActivitySource _traduireActivitySource;
 
-        public DownloadController(ILogger<DownloadController> logger, DaprTranscriptionService client)
+        public DownloadController(ILogger<DownloadController> logger, DaprTranscriptionService client, ActivitySource traduireActivitySource)
         {
             _logger = logger;
             _client = client;
+            _traduireActivitySource = traduireActivitySource;
         }
 
         [HttpGet("{TranscriptionId}")]
         public async Task<ActionResult> Get(string TranscriptionId, CancellationToken cancellationToken)
         {
+            using var activity = _traduireActivitySource.StartActivity("DownloadController.GetActivity");
+
             try
             {
                 _logger.LogInformation($"{TranscriptionId}. Attempting to download completed transcription");
@@ -50,7 +54,7 @@ namespace transcription.Controllers
                 _logger.LogWarning($"Failed to transctionId {TranscriptionId} - {ex.Message}");
             }
 
-
+            activity.Stop();
             return BadRequest();
         }
     }

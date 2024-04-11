@@ -43,6 +43,10 @@ spec:
           value: {{ .Values.REGION }}
         - name: MSI_CLIENT_ID
           value: {{ .Values.WORKLOAD_ID.CLIENT_ID }}
+        - name: TRADUIRE_APPNAME
+          value: {{ .Values.APP_NAME }}
+        - name: TRADUIRE_OTEL_COLLECTION_ENDPOINT
+          value: {{ .Values.OTEL_COLLECTION_ENDPOINT }}
       tolerations:
       - key: "app"
         operator: "Equal"

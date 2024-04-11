@@ -24,16 +24,26 @@ namespace transcription.Controllers
     {
         private readonly ILogger _logger;
         private static DaprTranscriptionService _client;
-
-        public StatusController(ILogger<StatusController> logger, DaprTranscriptionService client)
+        private static ActivitySource _traduireActivitySource;
+        private static Meter _traduireApiMeter;
+        private Counter<int> apiCount;
+    
+        public StatusController(ILogger<StatusController> logger, DaprTranscriptionService client, ActivitySource traduireActivitySource, Meter traduireApiMeter)
         {
             _logger = logger;
             _client = client;
+            _traduireActivitySource = traduireActivitySource;
+            _traduireApiMeter = traduireApiMeter;
+
+            apiCount = _traduireApiMeter.CreateCounter<int>("traduire.api.count", description: "Counts the times the API is called");
         }
 
         [HttpGet("{TranscriptionId}")]
         public async Task<ActionResult> Get(string TranscriptionId, CancellationToken cancellationToken)
         {
+            using var activity = _traduireActivitySource.StartActivity("StatusController.GetActivity");
+            apiCount.Add(1);
+
             try
             {
                 _logger.LogInformation($"{TranscriptionId}. Status API Called");
@@ -53,6 +63,7 @@ namespace transcription.Controllers
                 _logger.LogWarning($"Failed to transctionId {TranscriptionId} - {ex.Message}");
             }
 
+            activity.Stop(); // Stop the activity
             return BadRequest();
         }
     }

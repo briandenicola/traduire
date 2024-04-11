@@ -17,7 +17,7 @@ namespace traduire.webapi
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        public static IHostBuilder CreateHostBuilder(string[] args) => 
             Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(logging =>
                 {
@@ -28,10 +28,12 @@ namespace traduire.webapi
                 {
                     webBuilder.ConfigureKestrel(options =>
                     {
+                        options.ListenAnyIP(9090);
                         options.ListenAnyIP(8080, o => o.Protocols = HttpProtocols.Http1AndHttp2);
                     });
 
                     webBuilder.UseStartup<Startup>();
                 });
+        
     }
 }
