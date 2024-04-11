@@ -66,3 +66,17 @@ resource "azurerm_role_assignment" "grafana_monitor_read" {
   principal_id                     = azurerm_dashboard_grafana.this.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
+
+resource "azurerm_role_assignment" "grafana_log_analytics_reader" {
+  scope                            = azurerm_resource_group.traduire_app.id
+  role_definition_name             = "Log Analytics Reader"
+  principal_id                     = azurerm_dashboard_grafana.this.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
+resource "azurerm_role_assignment" "grafana_metric_publisher" {
+  scope                            = azurerm_resource_group.traduire_app.id
+  role_definition_name             = "Monitoring Contributor"
+  principal_id                     = azurerm_dashboard_grafana.this.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
