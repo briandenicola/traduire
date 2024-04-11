@@ -57,7 +57,7 @@ namespace traduire.webapi
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Traduie Api v1");
             });
 
-            app.UseOpenTelemetryPrometheusScrapingEndpoint( context =>  context.Connection.LocalPort == 9090 );
+            app.UseOpenTelemetryPrometheusScrapingEndpoint( context =>  context.Connection.LocalPort == 9091 );
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHealthChecks("/healthz");
