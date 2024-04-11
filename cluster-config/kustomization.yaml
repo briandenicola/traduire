@@ -5,3 +5,4 @@ resources:
   - kubecost.yaml
   - cert-manager.yaml
   - kong-api-gateway.yaml
+  - prometheus-config.yaml
