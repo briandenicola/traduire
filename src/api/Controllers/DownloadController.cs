@@ -1,10 +1,4 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Dapr.Client;
-using Microsoft.Extensions.Logging;
-
 using transcription.models;
 using transcription.api.dapr;
 
@@ -29,33 +23,20 @@ namespace transcription.Controllers
         public async Task<ActionResult> Get(string TranscriptionId, CancellationToken cancellationToken)
         {
             using var activity = _traduireActivitySource.StartActivity("DownloadController.GetActivity");
+            _logger.LogInformation("{TranscriptionId}. Attempting to download completed transcription", TranscriptionId);
 
-            try
-            {
-                _logger.LogInformation($"{TranscriptionId}. Attempting to download completed transcription");
-
-                var state = await _client.GetState(TranscriptionId);
-
-                if (state == null)
-                {
-                    return NotFound();
-                }
-
-                if (state.Status == TraduireTranscriptionStatus.Completed)
-                {
-                    _logger.LogInformation($"{TranscriptionId}. Current status is {TraduireTranscriptionStatus.Completed}. Returning transcription");
-                    return Ok(new { TranscriptionId = TranscriptionId, StatusMessage = state.Status, Transcription = state.TranscriptionText });
-                }
-
-                _logger.LogInformation($"{TranscriptionId}. Transcription status is not {TraduireTranscriptionStatus.Completed}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning($"Failed to transctionId {TranscriptionId} - {ex.Message}");
+            var state = await _client.GetState(TranscriptionId);
+            if (state == null)  {
+                return NotFound();
             }
 
-            activity.Stop();
-            return BadRequest();
+            if (state.Status == TraduireTranscriptionStatus.Completed) {
+                _logger.LogInformation("{TranscriptionId}. Current status is {TraduireTranscriptionStatus}. Returning transcription", TranscriptionId, TraduireTranscriptionStatus.Completed );
+                return Ok(new { TranscriptionId, StatusMessage = state.Status, Transcription = state.TranscriptionText });
+            }
+
+            _logger.LogInformation("{TranscriptionId}. Current status is {TraduireTranscriptionStatus}. Transcription is not yet complete", TranscriptionId, state.Status); 
+            return NoContent();
         }
     }
 }

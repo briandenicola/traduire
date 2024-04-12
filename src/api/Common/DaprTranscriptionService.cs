@@ -1,13 +1,6 @@
-using System;
-using System.IO;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
 using Dapr;
 using Dapr.Client;
-using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 
@@ -26,31 +19,31 @@ namespace transcription.api.dapr
             _client = client;
         }
 
-        private async Task<string> ConvertFileToBase64Encoding(IFormFile file)
+        private static async Task<string> ConvertFileToBase64Encoding(IFormFile file)
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                await file.CopyToAsync(memoryStream);
-                return Convert.ToBase64String(memoryStream.ToArray());
-            }
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            return Convert.ToBase64String(memoryStream.ToArray());
         }
 
         public async Task<BlobBindingResponse> UploadFile(IFormFile file, CancellationToken cancellationToken)
         {
             safeFileName = WebUtility.HtmlEncode(file.FileName);
 
-            var metadata = new Dictionary<string, string>();
-            metadata.Add("blobName", safeFileName);
+            Dictionary<string,string> metadata = new()
+            {
+                { "blobName", safeFileName }
+            };
 
             var encodedFile = await ConvertFileToBase64Encoding(file);
 
-            return (await _client.InvokeBindingAsync<string, BlobBindingResponse>(
-                    Components.BlobStoreName,
-                    Components.CreateOperation,
-                    encodedFile,
-                    metadata,
-                    cancellationToken
-            ));
+            return await _client.InvokeBindingAsync<string, BlobBindingResponse>(
+                Components.BlobStoreName,
+                Components.CreateOperation,
+                encodedFile,
+                metadata,
+                cancellationToken
+            );
         }
 
         public async Task<Uri> GetBlobSasToken(string url, string userAssignedClientId)
@@ -61,7 +54,7 @@ namespace transcription.api.dapr
             var accountName = blobClient.AccountName;
 
             var delegationKey = await blobClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(7));
-            BlobSasBuilder sasBuilder = new BlobSasBuilder()
+            BlobSasBuilder sasBuilder = new()
             {
                 BlobContainerName = uri.Segments[1].Trim('/'),
                 BlobName = uri.Segments[2],
@@ -73,7 +66,7 @@ namespace transcription.api.dapr
             sasBuilder.SetPermissions(BlobSasPermissions.Read);
             var sasQueryParams = sasBuilder.ToSasQueryParameters(delegationKey, accountName).ToString();
 
-            UriBuilder sasUri = new UriBuilder()
+            UriBuilder sasUri = new()
             {
                 Scheme = "https",
                 Host = uri.Host,
@@ -84,7 +77,7 @@ namespace transcription.api.dapr
             return sasUri.Uri;
         }
 
-        public async Task<StateEntry<TraduireTranscription>> UpdateState(String id, string url)
+        public async Task<StateEntry<TraduireTranscription>> UpdateState(string id, Uri url)
         {
             var state = await _client.GetStateEntryAsync<TraduireTranscription>(Components.StateStoreName, id);
 
@@ -95,7 +88,7 @@ namespace transcription.api.dapr
                 LastUpdateTime = DateTime.UtcNow,
                 Status = TraduireTranscriptionStatus.Started,
                 FileName = safeFileName,
-                BlobUri = url
+                BlobUri = url.ToString()
             };
             await state.SaveAsync();
 
@@ -108,12 +101,12 @@ namespace transcription.api.dapr
             return state.Value;
         }
 
-        public async Task PublishEvent(String id, string url, CancellationToken cancellationToken)
+        public async Task PublishEvent(string id, Uri url, CancellationToken cancellationToken)
         {
             var eventdata = new TradiureTranscriptionRequest()
             {
                 TranscriptionId = new Guid(id),
-                BlobUri = url
+                BlobUri = url.ToString()
             };
 
             await _client.PublishEventAsync(Components.PubSubName, Topics.TranscriptionSubmittedTopicName, eventdata, cancellationToken);

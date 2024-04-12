@@ -21,10 +21,10 @@ namespace transcription.api.dapr
 
         public Task<Uri> GetBlobSasToken(string url, string userAssignedClientId);
 
-        public Task<StateEntry<TraduireTranscription>> UpdateState(string id, string url);
+        public Task<StateEntry<TraduireTranscription>> UpdateState(string id, Uri url);
 
         public Task<TraduireTranscription> GetState(string id);
 
-        public Task PublishEvent(string id, string url, CancellationToken cancellationToken);
+        public Task PublishEvent(string id, Uri url, CancellationToken cancellationToken);
     }
 }

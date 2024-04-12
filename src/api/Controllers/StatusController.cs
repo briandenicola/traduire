@@ -26,7 +26,7 @@ namespace transcription.Controllers
         private static DaprTranscriptionService _client;
         private static ActivitySource _traduireActivitySource;
         private static Meter _traduireApiMeter;
-        private Counter<int> apiCount;
+        private readonly Counter<int> apiCount;
     
         public StatusController(ILogger<StatusController> logger, DaprTranscriptionService client, ActivitySource traduireActivitySource, Meter traduireApiMeter)
         {
@@ -42,29 +42,17 @@ namespace transcription.Controllers
         public async Task<ActionResult> Get(string TranscriptionId, CancellationToken cancellationToken)
         {
             using var activity = _traduireActivitySource.StartActivity("StatusController.GetActivity");
+                        
+            _logger.LogInformation("{TranscriptionId}. Status API Called", TranscriptionId);
+
+            var state = await _client.GetState(TranscriptionId);
+            if (state == null) {
+                return NotFound();
+            }
+
             apiCount.Add(1);
-
-            try
-            {
-                _logger.LogInformation($"{TranscriptionId}. Status API Called");
-
-                var state = await _client.GetState(TranscriptionId);
-
-                if (state == null)
-                {
-                    return NotFound();
-                }
-
-                _logger.LogInformation($"{TranscriptionId}. Current status is {state.Status}");
-                return Ok(new { TranscriptionId = TranscriptionId, StatusMessage = state.Status, LastUpdated = state.LastUpdateTime });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning($"Failed to transctionId {TranscriptionId} - {ex.Message}");
-            }
-
-            activity.Stop(); // Stop the activity
-            return BadRequest();
+            _logger.LogInformation("{TranscriptionId}. Current status is {Status}", TranscriptionId, state.Status);
+            return Ok(new { TranscriptionId, StatusMessage = state.Status, LastUpdated = state.LastUpdateTime });
         }
     }
 }

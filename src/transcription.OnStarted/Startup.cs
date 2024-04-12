@@ -12,16 +12,10 @@ using transcription.common.cognitiveservices;
 
 namespace transcription.TranslationOnStarted
 {
-    public class Startup
+    public class Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public IConfiguration Configuration { get; } = configuration;
 
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors(options =>
@@ -37,7 +31,7 @@ namespace transcription.TranslationOnStarted
 
             var region = Environment.GetEnvironmentVariable("AZURE_COGS_REGION");
             var cogs = new AzureCognitiveServicesClient(Configuration[Components.SecretName], region);
-            services.AddSingleton<AzureCognitiveServicesClient>(cogs);
+            _ = services.AddSingleton<AzureCognitiveServicesClient>(cogs);
 
             services.AddAzureClients(builder =>
             {

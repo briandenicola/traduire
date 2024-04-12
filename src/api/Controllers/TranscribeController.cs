@@ -29,30 +29,18 @@ namespace transcription.Controllers
         [HttpPost]
         public async Task<ActionResult> Post(TranscriptionReferenceRequest reference, CancellationToken cancellationToken)
         {
-
             using var activity = _traduireActivitySource.StartActivity("TranscribeController.PostActivity");
-    
+
             var TranscriptionId = Guid.NewGuid().ToString();
+            
+            _logger.LogInformation("{TranscriptionId}. Request to transcribe {blobURL} was received", TranscriptionId, reference.blobURL);
+            var state = await _client.UpdateState(TranscriptionId, new Uri(reference.blobURL) );
 
-            try
-            {
-                _logger.LogInformation($"{TranscriptionId}. Request to transcribe {reference.blobURL} was received");
+            _logger.LogInformation("{TranscriptionId}. Record was successfully saved as to {StateStoreName} State Store", TranscriptionId, Components.StateStoreName);
+            await _client.PublishEvent(TranscriptionId, new Uri(reference.blobURL), cancellationToken);
 
-                var state = await _client.UpdateState(TranscriptionId, reference.blobURL);
-                _logger.LogInformation($"{TranscriptionId}. Record was successfully saved as to {Components.StateStoreName} State Store");
-
-                await _client.PublishEvent(TranscriptionId, reference.blobURL, cancellationToken);
-                _logger.LogInformation($"{TranscriptionId}. {reference.blobURL} was successfully published to {Components.PubSubName} pubsub store");
-
-                return Ok(new { TranscriptionId = TranscriptionId, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning($"Failed to transcribe {reference.blobURL} - {ex.Message}");
-            }
-
-            activity.Stop(); // Stop the activity
-            return BadRequest();
+            _logger.LogInformation("{TranscriptionId}. {blobURL} was successfully published to {PubSubName} pubsub store", TranscriptionId, reference.blobURL, Components.PubSubName);
+            return Ok(new { TranscriptionId, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime });
         }
     }
 }

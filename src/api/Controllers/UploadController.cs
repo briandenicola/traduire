@@ -32,38 +32,24 @@ namespace transcription.Controllers
         [HttpPost, DisableRequestSizeLimit]
         public async Task<ActionResult> Post([FromForm] IFormFile file, CancellationToken cancellationToken)
         {
-            using var activity = _traduireActivitySource.StartActivity("UploadController.PostActivity");
-
             var TranscriptionId = Guid.NewGuid().ToString();
 
-            _logger.LogInformation($"File upload request was received.");
-            try
-            {
-                _logger.LogInformation($"{TranscriptionId}. Base64 encoding file and uploading via Dapr to {Components.BlobStoreName}.");
+            using var activity = _traduireActivitySource.StartActivity("UploadController.PostActivity");
+        
+            _logger.LogInformation("{TranscriptionId}. File upload request was received.", TranscriptionId);
+            var response = await _client.UploadFile(file, cancellationToken);
 
-                var response = await _client.UploadFile(file, cancellationToken);
-                _logger.LogInformation($"{TranscriptionId}. File was saved to {Components.BlobStoreName} blob storage");
+            _logger.LogInformation("{TranscriptionId}. File was saved to {BlobStoreName} blob storage", TranscriptionId, Components.BlobStoreName);
 
-                var sasUrl = _client.GetBlobSasToken(response.blobURL, msiClientID).GetAwaiter().GetResult().ToString();
+            var sasUrl = await _client.GetBlobSasToken(response.blobURL, msiClientID);
+            var state = await _client.UpdateState(TranscriptionId, sasUrl);
 
-                var state = await _client.UpdateState(TranscriptionId, sasUrl);
-                _logger.LogInformation($"{TranscriptionId}. Record was saved as to {Components.StateStoreName} State Store");
+            _logger.LogInformation("{TranscriptionId}. Record was successfully saved as to {StateStoreName} State Store", TranscriptionId, Components.StateStoreName);
+            
+            await _client.PublishEvent(TranscriptionId, sasUrl, cancellationToken);
+            _logger.LogInformation("{TranscriptionId}. {sasUrl} was published to {PubSubName} store", TranscriptionId, sasUrl, Components.PubSubName);
 
-                await _client.PublishEvent(TranscriptionId, sasUrl, cancellationToken);
-                _logger.LogInformation($"{TranscriptionId}. {sasUrl} was published to {Components.PubSubName} pubsub store");
-
-                return Ok(new { TranscriptionId = TranscriptionId, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning($"Failed to create {file.FileName} - {ex.Message}");
-
-                if (ex.InnerException != null)
-                    _logger.LogWarning("Inner exception: {0}", ex.InnerException);
-            }
-
-            activity.Stop(); // Stop the activity
-            return BadRequest();
+            return Ok(new { TranscriptionId, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime });
         }
     }
 }
