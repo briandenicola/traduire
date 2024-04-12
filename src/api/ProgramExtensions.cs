@@ -4,15 +4,20 @@ public static class ProgramExtensions
 {
     public static void AddCustomOtelConfiguration (this IServiceCollection services, string ApplicationName,  string azureMonitorConnectionString)
     {
-        var otel = services.AddOpenTelemetry();
+        var credential = new DefaultAzureCredential();
+        var otel = services.AddOpenTelemetry()
+            .UseAzureMonitor( o => {
+                o.ConnectionString = azureMonitorConnectionString;
+                o.Credential = credential;
+                o.SamplingRatio = 0.1F;
+            });
 
         var traduireApiMeter = new Meter("traduire", "2.0.0");
         var traduireActivitySource = new ActivitySource("traduire.api");
-        var credential = new DefaultAzureCredential();
 
         otel.ConfigureResource(resource => resource
             .AddService(serviceName: ApplicationName));
-            
+
         otel.WithMetrics( metrics => metrics
             .AddAspNetCoreInstrumentation()
             .AddRuntimeInstrumentation()
