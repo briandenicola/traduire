@@ -53,6 +53,13 @@ resource "azurerm_role_assignment" "certs" {
   skip_service_principal_aad_check = true
 }
 
+resource "azurerm_role_assignment" "secrets" {
+  scope                            = azurerm_application_insights.this.id
+  role_definition_name             = "Monitoring Metrics Publisher"
+  principal_id                     = azurerm_user_assigned_identity.traduire_identity.principal_id
+  skip_service_principal_aad_check = true
+}
+
 resource "azurerm_role_assignment" "grafana_monitor_data_reader" {
   scope                            = azurerm_resource_group.traduire_app.id
   role_definition_name             = "Monitoring Data Reader"
