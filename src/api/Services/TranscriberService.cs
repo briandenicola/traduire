@@ -40,11 +40,11 @@ namespace traduire.webapi
             try
             {
 
-                var state = await _client.UpdateState(TranscriptionId, request.BlobUri);
+                var state = await _client.UpdateState(TranscriptionId, new Uri(request.BlobUri) );
                 _logger.LogInformation($"{TranscriptionId}. Transcription request was saved as to {Components.StateStoreName} State Store");
                 await responseStream.WriteAsync(reply);
 
-                await _client.PublishEvent(TranscriptionId, request.BlobUri, context.CancellationToken);
+                await _client.PublishEvent(TranscriptionId, new Uri(request.BlobUri), context.CancellationToken) ;
                 _logger.LogInformation($"{TranscriptionId}. {request.BlobUri} was published to {Components.PubSubName} pubsub store");
                 reply.Status = TraduireTranscriptionStatus.SentToCognitiveServices.ToString();
                 reply.LastUpdateTime = DateTime.UtcNow.ToString();
