@@ -16,10 +16,8 @@ RUN dotnet restore
 COPY ./transcription.OnStarted/. .
 RUN dotnet publish -c Release -o out
 
-#Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled
 WORKDIR /app
 COPY --from=build-env /app/onstarted/out .
 
-#ENTRYPOINT ["dotnet", "transcription.onstarted.dll"]
 ENTRYPOINT ["/app/transcription.onstarted"]

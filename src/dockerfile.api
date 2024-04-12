@@ -19,10 +19,8 @@ RUN dotnet restore
 COPY ./api/. .
 RUN dotnet publish -c Release -o out
 
-#Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled
 WORKDIR /app
 COPY --from=build-env /app/api/out .
 
-#ENTRYPOINT ["dotnet", "traduire.webapi.dll"]
 ENTRYPOINT ["/app/traduire.webapi"]
