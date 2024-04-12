@@ -20,7 +20,11 @@ namespace traduire.webapi
             var config = builder.Build();
 
             services.AddHealthChecks();
-            services.AddCustomOtelConfiguration(config["appname"], config["otel_collection_endpoint"]);
+            services.AddCustomOtelConfiguration(
+                config["appname"], 
+                config["otel_collection_endpoint"], 
+                config["app_insights_connection_string"]
+            );
 
             services.AddCors(options =>
             {

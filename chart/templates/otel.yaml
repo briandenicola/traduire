@@ -13,6 +13,10 @@ metadata:
     component: otel-collector
 spec:
   ports:
+  - name: grpc
+    port: 4317
+    protocol: TCP
+    targetPort: 4317
   - name: zipkin
     port: 9411
     protocol: TCP
@@ -41,10 +45,10 @@ spec:
     spec:
       containers:
       - name: otel-collector
-        image: otel/opentelemetry-collector-contrib-dev:latest
+        image: otel/opentelemetry-collector-contrib:latest
         command:
-          - "/otelcontribcol"
-          - "--config=/conf/otel-collector-config.yaml"
+        - "/otelcol-contrib"
+        - "--config=/config/otel-collector-config.yaml"
         resources:
           limits:
             cpu: 1
@@ -53,10 +57,9 @@ spec:
             cpu: 200m
             memory: 400Mi
         ports:
-          - containerPort: 9411 # Default endpoint for Zipkin receiver.
-        volumeMounts:
-          - name: otel-collector-config-vol
-            mountPath: /conf
+          - containerPort: 9411
+          - containerPort: 4317
+          - containerPort: 13133
         livenessProbe:
           httpGet:
             path: /
@@ -65,48 +68,68 @@ spec:
           httpGet:
             path: /
             port: 13133
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
       volumes:
-        - configMap:
-            name: otel-collector-conf
-            items:
-              - key: otel-collector-config
-                path: otel-collector-config.yaml
-          name: otel-collector-config-vol
+      - name: config
+        configMap:
+          name: otel-collector-config
+          items:
+          - key: "otel-collector-config.yaml"
+            path: "otel-collector-config.yaml"
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: otel-collector-conf
+  name: otel-collector-config
   namespace: otel-system
-  labels:
-    app: opentelemetry
-    component: otel-collector-conf
 data:
-  otel-collector-config: |
+  otel-collector-config.yaml: |
     receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+            
       zipkin:
         endpoint: 0.0.0.0:9411
+
+    processors:
+      batch:
+
     extensions:
       health_check:
       pprof:
         endpoint: :1888
       zpages:
         endpoint: :55679
+
     exporters:
+      debug:
+        verbosity: detailed
+
       azuremonitor:
         endpoint: "https://dc.services.visualstudio.com/v2/track"
         instrumentation_key:  {{ .Values.APP_INSIGHTS.INSTRUMENTION_KEY }}
+        maxbatchsize: 100
         maxbatchinterval: 10s
+
     service:
-      extensions: [pprof, zpages, health_check]
+      extensions: [health_check]
       pipelines:
         traces:
           receivers: [zipkin]
-          exporters: [azuremonitor]
-        # metrics:
-        #   receivers: [zipkin]
-        #   exporters: [azuremonitor]
-        # logs:
-        #   receivers: [zipkin]
-        #   exporters: [azuremonitor]
+          processors: [batch]
+          exporters: [debug,azuremonitor]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [debug,azuremonitor]
+        logs:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [debug,azuremonitor]
+
 ---

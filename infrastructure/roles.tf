@@ -53,7 +53,7 @@ resource "azurerm_role_assignment" "certs" {
   skip_service_principal_aad_check = true
 }
 
-resource "azurerm_role_assignment" "secrets" {
+resource "azurerm_role_assignment" "metric_publisher" {
   scope                            = azurerm_application_insights.this.id
   role_definition_name             = "Monitoring Metrics Publisher"
   principal_id                     = azurerm_user_assigned_identity.traduire_identity.principal_id

@@ -2,7 +2,7 @@ namespace traduire.webapi;
 
 public static class ProgramExtensions
 {
-    public static void AddCustomOtelConfiguration (this IServiceCollection services, string ApplicationName,  string azureMonitorConnectionString)
+    public static void AddCustomOtelConfiguration (this IServiceCollection services, string ApplicationName, string otelConnnectionString, string azureMonitorConnectionString)
     {
         var credential = new DefaultAzureCredential();
         var otel = services.AddOpenTelemetry()
@@ -27,9 +27,10 @@ public static class ProgramExtensions
             .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
             .AddPrometheusExporter()
             .AddConsoleExporter()
-            .AddAzureMonitorMetricExporter(o => {
-                o.ConnectionString = azureMonitorConnectionString;
-                o.Credential = credential;
+            .AddOtlpExporter(opt =>
+            {
+                opt.Protocol = OtlpExportProtocol.Grpc;
+                opt.Endpoint = new Uri(otelConnnectionString);
             })
         );
 
@@ -38,9 +39,10 @@ public static class ProgramExtensions
             .AddHttpClientInstrumentation()
             .AddSource(traduireActivitySource.Name)
             .AddConsoleExporter()
-            .AddAzureMonitorTraceExporter(o => {
-                o.ConnectionString = azureMonitorConnectionString;
-                o.Credential = credential;
+            .AddOtlpExporter(opt =>
+            {
+                opt.Protocol = OtlpExportProtocol.Grpc;
+                opt.Endpoint = new Uri(otelConnnectionString);
             })
         );
     }

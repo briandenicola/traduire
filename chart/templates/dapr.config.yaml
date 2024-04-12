@@ -10,7 +10,7 @@ spec:
     samplingRate: "1"
     stdout: true
     zipkin:
-      endpointAddress: {{ print "http://" .Values.OTEL_COLLECTION_ENDPOINT "/api/v2/spans" | quote }}
+      endpointAddress: {{ print .Values.ZIPKIN_ENDPOINT | quote }}
   mtls:
     enabled: true
     workloadCertTTL: "24h"
