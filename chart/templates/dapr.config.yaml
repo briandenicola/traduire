@@ -9,10 +9,6 @@ spec:
   tracing:
     samplingRate: "1"
     stdout: true
-    otel:
-      endpointAddress: {{ print .Values.OTEL_COLLECTION_ENDPOINT | quote }}
-      isSecure: false
-      protocol: http
     zipkin:
       endpointAddress: {{ print "http://" .Values.OTEL_COLLECTION_ENDPOINT "/api/v2/spans" | quote }}
   mtls:
