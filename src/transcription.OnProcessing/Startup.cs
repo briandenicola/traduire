@@ -1,11 +1,4 @@
-using System;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Azure;
-using Azure.Messaging.WebPubSub;
 
 using transcription.models;
 using transcription.actors;
@@ -13,14 +6,9 @@ using transcription.common.cognitiveservices;
 
 namespace transcription.processing
 {
-    public class Startup
+    public class Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; } = configuration;
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -32,7 +20,6 @@ namespace transcription.processing
                         builder.WithOrigins("*");
                     });
             });
-
 
             services.AddControllers();
 

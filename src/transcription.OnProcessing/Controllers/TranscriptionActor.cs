@@ -18,28 +18,18 @@ using transcription.common.cognitiveservices;
 
 namespace transcription.actors
 {
-    public class TranscriptionActor : Actor, ITranscriptionActor, IRemindable
+    public class TranscriptionActor(ActorHost host, ILogger<TranslationOnProcessing> logger, IConfiguration configuration, DaprClient Client, AzureCognitiveServicesClient CogsClient, WebPubSubServiceClient ServiceClient) : Actor(host), ITranscriptionActor, IRemindable
     {
         private const int WAIT_TIME = 30;
         private const string ProcessingStatusReminder = "ProcessingStatusReminder";
 
         private StateEntry<TraduireTranscription> state;
-        private readonly TraduireNotificationService _serviceClient;
-        private readonly IConfiguration _configuration;
-        private readonly DaprClient _client;
-        private readonly AzureCognitiveServicesClient _cogsClient;
-        private readonly ILogger _logger;
+        private readonly TraduireNotificationService _serviceClient = new TraduireNotificationService(ServiceClient);
+        private readonly IConfiguration _configuration = configuration;
+        private readonly DaprClient _client = Client;
+        private readonly AzureCognitiveServicesClient _cogsClient = CogsClient;
+        private readonly ILogger _logger = logger;
         private TradiureTranscriptionRequest transcriptionRequest;
-
-        public TranscriptionActor(ActorHost host, ILogger<TranslationOnProcessing> logger, IConfiguration configuration, DaprClient Client, AzureCognitiveServicesClient CogsClient, WebPubSubServiceClient ServiceClient)
-            : base(host)
-        {
-            _client = Client;
-            _logger = logger;
-            _configuration = configuration;
-            _cogsClient = CogsClient;
-            _serviceClient = new TraduireNotificationService(ServiceClient);
-        }
 
         public async Task SubmitAsync(string transcriptionId, string uri)
         {
@@ -51,13 +41,13 @@ namespace transcription.actors
 
             await UpdateStateRepository(TraduireTranscriptionStatus.Pending, HttpStatusCode.Accepted);
 
-            _logger.LogInformation($"{transcriptionId}. Registering {ProcessingStatusReminder} Actor Reminder for {WAIT_TIME} seconds");
+            _logger.LogInformation("{transcriptionId}. Registering {ProcessingStatusReminder} Actor Reminder for {WAIT_TIME} seconds", transcriptionId,ProcessingStatusReminder,WAIT_TIME);
+
             await RegisterReminderAsync(
                 ProcessingStatusReminder,
                 null,
                 TimeSpan.FromSeconds(WAIT_TIME),
                 TimeSpan.FromSeconds(WAIT_TIME));
-
         }
 
         private async Task<(Transcription response, HttpStatusCode code)> CheckCognitiveServicesTranscriptionStatusAsync()
@@ -86,22 +76,25 @@ namespace transcription.actors
 
         private async Task PublishTranscriptionCompletion(string transcriptionId, string uri)
         {
-            _logger.LogInformation($"{transcriptionId}. Azure Cognitive Services has completed processing transcription");
+            _logger.LogInformation("{transcriptionId}. Azure Cognitive Services has completed processing transcription", transcriptionId);
+            
             await UpdateStateRepository(TraduireTranscriptionStatus.Completed, HttpStatusCode.OK);
 
-            var completionEvent = new TradiureTranscriptionRequest()
-            {
-                TranscriptionId = new Guid(transcriptionId),
-                BlobUri = uri
-            };
+            await _client.PublishEventAsync(
+                            Components.PubSubName, 
+                            Topics.TranscriptionCompletedTopicName, 
+                            new TradiureTranscriptionRequest() {
+                                TranscriptionId = new Guid(transcriptionId),
+                                BlobUri = uri
+                            }, 
+                            CancellationToken.None);
 
-            await _client.PublishEventAsync(Components.PubSubName, Topics.TranscriptionCompletedTopicName, completionEvent, CancellationToken.None);
             await UnregisterReminderAsync(ProcessingStatusReminder);
         }
 
         private async Task PublishTranscriptionFailure()
         {
-            _logger.LogInformation($"{transcriptionRequest.TranscriptionId.ToString()}. Transcription Failed for an unexpected reason. Added to Failed Queue for review");
+            _logger.LogInformation("{transcriptionId}. Transcription Failed for an unexpected reason. Added to Failed Queue for review", transcriptionRequest.TranscriptionId);
             await UpdateStateRepository(TraduireTranscriptionStatus.Failed, HttpStatusCode.BadRequest);
 
             await _client.PublishEventAsync(Components.PubSubName, Topics.TranscriptionFailedTopicName, transcriptionRequest, CancellationToken.None);
@@ -110,7 +103,7 @@ namespace transcription.actors
 
         private async Task PublishTranscriptionStillProcessing()
         {
-            _logger.LogInformation($"{transcriptionRequest.TranscriptionId.ToString()}. Azure Cognitive Services is still progressing request");
+            _logger.LogInformation("{transcriptionId}. Azure Cognitive Services is still progressing request", transcriptionRequest.TranscriptionId);
             await UpdateStateRepository(TraduireTranscriptionStatus.Pending, HttpStatusCode.OK);
         }
 

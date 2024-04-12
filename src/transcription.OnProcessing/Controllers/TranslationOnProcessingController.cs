@@ -18,35 +18,19 @@ using transcription.common.cognitiveservices;
 namespace transcription.Controllers
 {
     [ApiController]
-    public class TranslationOnProcessing : ControllerBase
+    public class TranslationOnProcessing(ILogger<TranslationOnProcessing> logger) : ControllerBase
     {
-        private readonly ILogger _logger;
-
-        public TranslationOnProcessing(ILogger<TranslationOnProcessing> logger)
-        {
-            _logger = logger;
-        }
+        private readonly ILogger _logger = logger;
 
         [Topic(Components.PubSubName, Topics.TranscriptionProcessingTopicName)]
         [HttpPost("status")]
         public async Task<ActionResult> Transcribe(TradiureTranscriptionRequest request, CancellationToken cancellationToken)
         {
-            try
-            {
-                _logger.LogInformation($"{request.TranscriptionId}. {request.BlobUri} was successfully received by Dapr PubSub");
-                _logger.LogInformation($"{request.TranscriptionId}. Instantiating a Transcription Actor to handle saga");
-                var transcriptionActor = this.GetTranscriptionActor(request.TranscriptionId);
-                await transcriptionActor.SubmitAsync(request.TranscriptionId.ToString(), request.BlobUri);
-
-                return Ok();
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning($"Nuts. Something really bad happened processing {request.BlobUri} - {ex.Message}");
-            }
-
-            return BadRequest();
+            _logger.LogInformation("{transcriptionId}. {BlobUri} was successfully received by Dapr PubSub", request.TranscriptionId, request.BlobUri);
+            _logger.LogInformation("{transcriptionId}. Instantiating a Transcription Actor to handle saga",  request.TranscriptionId);
+            var transcriptionActor = GetTranscriptionActor(request.TranscriptionId);
+            await transcriptionActor.SubmitAsync(request.TranscriptionId.ToString(), request.BlobUri);
+            return Ok();
         }
 
         private ITranscriptionActor GetTranscriptionActor(Guid transcriptId)
@@ -54,6 +38,5 @@ namespace transcription.Controllers
             var actorId = new ActorId(transcriptId.ToString());
             return ActorProxy.Create<ITranscriptionActor>(actorId, nameof(TranscriptionActor));
         }
-
     }
 }
