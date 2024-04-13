@@ -50,8 +50,6 @@ spec:
           value: {{ .Values.APP_NAME }}
         - name: TRADUIRE_OTEL_COLLECTION_ENDPOINT
           value: {{ .Values.OTEL_ENDPOINT }}
-        - name: TRADUIRE_APP_INSIGHTS_CONNECTION_STRING
-          value: {{ .Values.APP_INSIGHTS.CONNECTION_STRING }}
       tolerations:
       - key: "app"
         operator: "Equal"

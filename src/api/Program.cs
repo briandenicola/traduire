@@ -1,31 +1,55 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Dapr.Client;
+using transcription.api.dapr;
+using traduire.webapi;
 
-namespace traduire.webapi
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
+var configBuilder = new ConfigurationBuilder();
+configBuilder.AddEnvironmentVariables(prefix: "TRADUIRE_");
+var config = configBuilder.Build();
 
-        public static IHostBuilder CreateHostBuilder(string[] args) => 
-            Host.CreateDefaultBuilder(args)
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.AddConsole();
-                })
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.ConfigureKestrel(options =>
-                    {
-                        options.ListenAnyIP(9091, o => o.Protocols = HttpProtocols.Http1);
-                        options.ListenAnyIP(8080, o => o.Protocols = HttpProtocols.Http1AndHttp2);
-                    });
+var builder = WebApplication.CreateBuilder(args);
 
-                    webBuilder.UseStartup<Startup>();
-                });
-        
-    }
-}
+builder.Logging.ClearProviders();
+builder.Logging.AddOpenTelemetry(logging => { 
+    logging.IncludeScopes = true;
+    logging.AddConsoleExporter();
+    logging.AddOtlpExporter(otlpOptions => {
+        otlpOptions.Protocol = OtlpExportProtocol.Grpc;
+        otlpOptions.Endpoint = new Uri(config["otel_collection_endpoint"]);
+    });
+});
+
+builder.WebHost.ConfigureKestrel(opts => {
+    opts.ListenAnyIP(9091, o => o.Protocols = HttpProtocols.Http1);
+    opts.ListenAnyIP(8080, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+});
+
+builder.AddCustomOtelConfiguration(
+    config["appname"], 
+    config["otel_collection_endpoint"]
+);
+
+builder.Services.AddCors(options => {
+    options.AddDefaultPolicy( builder => {
+        builder.WithOrigins("*");
+    });
+});
+
+var client = new DaprTranscriptionService(new DaprClientBuilder().Build());
+builder.Services.AddSingleton<DaprTranscriptionService>(client);
+builder.Services.AddControllers().AddDapr();
+builder.Services.AddGrpc();
+builder.Services.AddGrpcReflection();
+builder.Services.AddSwaggerGen();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHealthChecks();
+
+var app = builder.Build();
+app.UseOpenTelemetryPrometheusScrapingEndpoint(context => context.Connection.LocalPort == 9091);
+app.MapHealthChecks("/healthz");
+app.MapControllers();
+app.MapGrpcService<TranscriberService>();
+app.MapGrpcReflectionService();
+
+app.Logger.LogInformation("App Run");
+app.Run();

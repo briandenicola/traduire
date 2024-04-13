@@ -2,15 +2,10 @@ namespace traduire.webapi;
 
 public static class ProgramExtensions
 {
-    public static void AddCustomOtelConfiguration (this IServiceCollection services, string ApplicationName, string otelConnnectionString, string azureMonitorConnectionString)
+    public static void AddCustomOtelConfiguration (this WebApplicationBuilder builder, string ApplicationName, string otelConnnectionString)
     {
         var credential = new DefaultAzureCredential();
-        var otel = services.AddOpenTelemetry()
-            .UseAzureMonitor( o => {
-                o.ConnectionString = azureMonitorConnectionString;
-                o.Credential = credential;
-                o.SamplingRatio = 0.1F;
-            });
+        var otel = builder.Services.AddOpenTelemetry();
 
         var traduireApiMeter = new Meter("traduire", "2.0.0");
         var traduireActivitySource = new ActivitySource("traduire.api");
