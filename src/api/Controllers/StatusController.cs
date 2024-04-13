@@ -43,7 +43,7 @@ namespace transcription.Controllers
         {
             using var activity = _traduireActivitySource.StartActivity("StatusController.GetActivity");
                         
-            _logger.LogInformation("{TranscriptionId}. Status API Called", TranscriptionId);
+            _logger.LogInformation( $"{TranscriptionId}. Status API Called" );
 
             var state = await _client.GetState(TranscriptionId);
             if (state == null) {
@@ -51,7 +51,7 @@ namespace transcription.Controllers
             }
 
             apiCount.Add(1);
-            _logger.LogInformation("{TranscriptionId}. Current status is {Status}", TranscriptionId, state.Status);
+            _logger.LogInformation( $"{TranscriptionId}. Current status is {state.Status}" );
             return Ok(new { TranscriptionId, StatusMessage = state.Status, LastUpdated = state.LastUpdateTime });
         }
     }

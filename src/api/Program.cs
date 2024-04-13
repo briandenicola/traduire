@@ -51,5 +51,5 @@ app.MapControllers();
 app.MapGrpcService<TranscriberService>();
 app.MapGrpcReflectionService();
 
-app.Logger.LogInformation("App Run");
+app.Logger.LogInformation( $"{builder.Environment.ApplicationName} - App Run" );
 app.Run();

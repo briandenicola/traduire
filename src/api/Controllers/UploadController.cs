@@ -36,18 +36,18 @@ namespace transcription.Controllers
 
             using var activity = _traduireActivitySource.StartActivity("UploadController.PostActivity");
         
-            _logger.LogInformation("{TranscriptionId}. File upload request was received.", TranscriptionId);
+            _logger.LogInformation( $"{TranscriptionId}. File upload request was received." );
             var response = await _client.UploadFile(file, cancellationToken);
 
-            _logger.LogInformation("{TranscriptionId}. File was saved to {BlobStoreName} blob storage", TranscriptionId, Components.BlobStoreName);
+            _logger.LogInformation( $"{TranscriptionId}. File was saved to {Components.BlobStoreName} blob storage" );
 
             var sasUrl = await _client.GetBlobSasToken(response.blobURL, msiClientID);
             var state = await _client.UpdateState(TranscriptionId, sasUrl);
 
-            _logger.LogInformation("{TranscriptionId}. Record was successfully saved as to {StateStoreName} State Store", TranscriptionId, Components.StateStoreName);
+            _logger.LogInformation( $"{TranscriptionId}. Record was successfully saved as to {Components.StateStoreName} State Store" );
             
             await _client.PublishEvent(TranscriptionId, sasUrl, cancellationToken);
-            _logger.LogInformation("{TranscriptionId}. {sasUrl} was published to {PubSubName} store", TranscriptionId, sasUrl, Components.PubSubName);
+            _logger.LogInformation( $"{TranscriptionId}. {sasUrl} was published to {Components.PubSubName} Pubsub store" );
 
             return Ok(new { TranscriptionId, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime });
         }

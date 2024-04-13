@@ -23,7 +23,7 @@ namespace transcription.Controllers
         public async Task<ActionResult> Get(string TranscriptionId, CancellationToken cancellationToken)
         {
             using var activity = _traduireActivitySource.StartActivity("DownloadController.GetActivity");
-            _logger.LogInformation("{TranscriptionId}. Attempting to download completed transcription", TranscriptionId);
+            _logger.LogInformation( $"{TranscriptionId}. Attempting to download completed transcription" );
 
             var state = await _client.GetState(TranscriptionId);
             if (state == null)  {
@@ -31,11 +31,11 @@ namespace transcription.Controllers
             }
 
             if (state.Status == TraduireTranscriptionStatus.Completed) {
-                _logger.LogInformation("{TranscriptionId}. Current status is {TraduireTranscriptionStatus}. Returning transcription", TranscriptionId, TraduireTranscriptionStatus.Completed );
+                _logger.LogInformation( $"{TranscriptionId}. Current status is {TraduireTranscriptionStatus.Completed }. Returning transcription" );
                 return Ok(new { TranscriptionId, StatusMessage = state.Status, Transcription = state.TranscriptionText });
             }
 
-            _logger.LogInformation("{TranscriptionId}. Current status is {TraduireTranscriptionStatus}. Transcription is not yet complete", TranscriptionId, state.Status); 
+            _logger.LogInformation( $"{TranscriptionId}. Current status is {state.Status}. Transcription is not yet complete" ); 
             return NoContent();
         }
     }
