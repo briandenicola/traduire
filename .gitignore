@@ -370,3 +370,4 @@ src/ui/.env
 src/ui/build
 src/ui/src/config.json
 traduire.sln
+tests/trace.zip
