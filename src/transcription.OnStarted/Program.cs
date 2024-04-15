@@ -23,7 +23,7 @@ builder.AddCustomOtelConfiguration(
     config["otel_collection_endpoint"]
 );
 
-var daprClient = new DaprClientBuilder().Build();
+using var daprClient = new DaprClientBuilder().Build();
 builder.Configuration.AddDaprSecretStore(Components.SecureStore, daprClient);
 
 builder.Services.AddCors(options => {
@@ -35,12 +35,12 @@ builder.Services.AddCors(options => {
 builder.Services.AddControllers();
 
 var region = Environment.GetEnvironmentVariable("AZURE_COGS_REGION");
-var cogs = new AzureCognitiveServicesClient(config[Components.SecretName], region);
+var cogs = new AzureCognitiveServicesClient(builder.Configuration[Components.SecretName], region);
 
 builder.Services.AddSingleton<DaprClient>(daprClient);
 builder.Services.AddSingleton<AzureCognitiveServicesClient>(cogs);
-builder.Services.AddAzureClients(builder => {
-    builder.AddWebPubSubServiceClient(config[Components.PubSubSecretName], Components.PubSubHubName);
+builder.Services.AddAzureClients( azure => {
+    azure.AddWebPubSubServiceClient(builder.Configuration[Components.PubSubSecretName], Components.PubSubHubName);
 });
 builder.Services.AddSwaggerGen();
 builder.Services.AddEndpointsApiExplorer();
