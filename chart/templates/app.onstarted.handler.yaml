@@ -40,6 +40,10 @@ spec:
         env:
         - name: AZURE_COGS_REGION
           value:  {{ .Values.REGION }}
+        - name: TRADUIRE_APPNAME
+          value: {{ .Values.APP_NAME }}
+        - name: TRADUIRE_OTEL_COLLECTION_ENDPOINT
+          value: {{ .Values.OTEL_ENDPOINT }}
       tolerations:
       - key: "app"
         operator: "Equal"

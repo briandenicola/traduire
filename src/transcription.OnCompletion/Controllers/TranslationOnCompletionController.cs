@@ -31,7 +31,7 @@ namespace transcription.Controllers
         [HttpPost("completed")]
         public async Task<ActionResult> Transcribe(TradiureTranscriptionRequest request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("{TranscriptionId}. {BlobUri} was successfully received by Dapr PubSub", request.TranscriptionId, request.BlobUri);
+            _logger.LogInformation( $"{request.TranscriptionId}. {request.BlobUri} was successfully received by Dapr PubSub" );
             state = await _client.GetStateEntryAsync<TraduireTranscription>(Components.StateStoreName, request.TranscriptionId.ToString(), cancellationToken: cancellationToken);
             state.Value ??= new TraduireTranscription();
 
@@ -40,17 +40,17 @@ namespace transcription.Controllers
             switch (code)
             {
                 case HttpStatusCode.OK:
-                    _logger.LogInformation("{TranscriptionId}. Transcription from '{BlobUri}' was saved to state store", request.TranscriptionId, request.BlobUri);
+                    _logger.LogInformation( $"{request.TranscriptionId}. Transcription from '{request.BlobUri}' was saved to state store" );
                     var firstChannel = result.CombinedRecognizedPhrases.FirstOrDefault();
 
                     await _serviceClient.PublishNotification(request.TranscriptionId.ToString(), state.Value.Status.ToString());
                     await UpdateStateRepository(TraduireTranscriptionStatus.Completed, firstChannel.Display);
 
-                    _logger.LogInformation("{TranscriptionId}. All working completed on request", request.TranscriptionId);
+                    _logger.LogInformation( $"{request.TranscriptionId}. All working completed on request" );
                     return Ok(request.TranscriptionId);
             
                 default:
-                    _logger.LogInformation("{TranscriptionId}. Transcription Failed for an unexpected reason. Added to Failed Queue for review", request.TranscriptionId);
+                    _logger.LogInformation( $"{request.TranscriptionId}. Transcription Failed for an unexpected reason. Added to Failed Queue for review" );
                     await _client.PublishEventAsync(
                                     Components.PubSubName, 
                                     Topics.TranscriptionFailedTopicName, 

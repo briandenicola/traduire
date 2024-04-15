@@ -41,7 +41,7 @@ namespace transcription.actors
 
             await UpdateStateRepository(TraduireTranscriptionStatus.Pending, HttpStatusCode.Accepted);
 
-            _logger.LogInformation("{transcriptionId}. Registering {ProcessingStatusReminder} Actor Reminder for {WAIT_TIME} seconds", transcriptionId,ProcessingStatusReminder,WAIT_TIME);
+            _logger.LogInformation( $"{transcriptionId}. Registering {ProcessingStatusReminder} Actor Reminder for {WAIT_TIME} seconds" );
 
             await RegisterReminderAsync(
                 ProcessingStatusReminder,
@@ -76,7 +76,7 @@ namespace transcription.actors
 
         private async Task PublishTranscriptionCompletion(string transcriptionId, string uri)
         {
-            _logger.LogInformation("{transcriptionId}. Azure Cognitive Services has completed processing transcription", transcriptionId);
+            _logger.LogInformation( $"{transcriptionId}. Azure Cognitive Services has completed processing transcription" );
             
             await UpdateStateRepository(TraduireTranscriptionStatus.Completed, HttpStatusCode.OK);
 
@@ -94,7 +94,7 @@ namespace transcription.actors
 
         private async Task PublishTranscriptionFailure()
         {
-            _logger.LogInformation("{transcriptionId}. Transcription Failed for an unexpected reason. Added to Failed Queue for review", transcriptionRequest.TranscriptionId);
+            _logger.LogInformation( $"{transcriptionRequest.TranscriptionId}. Transcription Failed for an unexpected reason. Added to Failed Queue for review" );
             await UpdateStateRepository(TraduireTranscriptionStatus.Failed, HttpStatusCode.BadRequest);
 
             await _client.PublishEventAsync(Components.PubSubName, Topics.TranscriptionFailedTopicName, transcriptionRequest, CancellationToken.None);
@@ -103,7 +103,7 @@ namespace transcription.actors
 
         private async Task PublishTranscriptionStillProcessing()
         {
-            _logger.LogInformation("{transcriptionId}. Azure Cognitive Services is still progressing request", transcriptionRequest.TranscriptionId);
+            _logger.LogInformation( $"{transcriptionRequest.TranscriptionId}. Azure Cognitive Services is still progressing request" );
             await UpdateStateRepository(TraduireTranscriptionStatus.Pending, HttpStatusCode.OK);
         }
 

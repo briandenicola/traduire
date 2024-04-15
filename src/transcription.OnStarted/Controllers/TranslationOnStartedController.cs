@@ -28,7 +28,7 @@ namespace transcription.Controllers
         [HttpPost("transcribe")]
         public async Task<ActionResult> Transcribe(TradiureTranscriptionRequest request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("{TranscriptionId}. {BlobUri} was successfully received by Dapr PubSub", request.TranscriptionId, request.BlobUri );
+            _logger.LogInformation( $"{request.TranscriptionId}. {request.BlobUri} was successfully received by Dapr PubSub" );
             (Transcription response, HttpStatusCode code) = await _cogsClient.SubmitTranscriptionRequestAsync(new Uri(request.BlobUri));
 
             await _serviceClient.PublishNotification(request.TranscriptionId.ToString(), response.Status);
@@ -42,7 +42,7 @@ namespace transcription.Controllers
 
         private async Task<ActionResult> HandleSuccess(string uri, Guid transcriptionId)
         {
-            _logger.LogInformation("{transcriptionId}. Event was successfully publish to Azure Cognitive Services", transcriptionId);
+            _logger.LogInformation( $"{transcriptionId}. Event was successfully publish to Azure Cognitive Services" );
             await UpdateStateRepository(TraduireTranscriptionStatus.SentToCognitiveServices, HttpStatusCode.Created, uri, transcriptionId);
 
             await _client.PublishEventAsync(
@@ -59,7 +59,7 @@ namespace transcription.Controllers
 
         private async Task<ActionResult> HandleFailure(string uri, Guid transcriptionId)
         {
-            _logger.LogInformation("{transcriptionId}. Transcription Failed for an unexpected reason. Added to Failed Queue for review", transcriptionId);
+            _logger.LogInformation( $"{transcriptionId}. Transcription Failed for an unexpected reason. Added to Failed Queue for review" );
             await UpdateStateRepository(TraduireTranscriptionStatus.Failed, HttpStatusCode.BadRequest, uri, transcriptionId);
 
             await _client.PublishEventAsync(

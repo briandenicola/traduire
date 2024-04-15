@@ -2,33 +2,64 @@ using Dapr.Client;
 using Dapr.Extensions.Configuration;
 
 using transcription.models;
+using transcription.processing;
+using transcription.actors;
 
-namespace transcription.processing
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
+var configBuilder = new ConfigurationBuilder();
+configBuilder.AddEnvironmentVariables(prefix: "TRADUIRE_");
+var config = configBuilder.Build();
 
-        public static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            var client = new DaprClientBuilder().Build();
+var builder = WebApplication.CreateBuilder(args);
 
-            return Host.CreateDefaultBuilder(args)
-               .ConfigureServices((services) =>
-                {
-                    services.AddSingleton<DaprClient>(client);
-                })
-                .ConfigureAppConfiguration((configBuilder) =>
-                {
-                    configBuilder.AddDaprSecretStore(Components.SecureStore, client);
-                })
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-        }
-    }
-}
+builder.Logging.ClearProviders();
+builder.Logging.AddOpenTelemetry(logging => { 
+    logging.IncludeScopes = true;
+    logging.AddConsoleExporter();
+    logging.AddOtlpExporter(otlpOptions => {
+        otlpOptions.Protocol = OtlpExportProtocol.Grpc;
+        otlpOptions.Endpoint = new Uri(config["otel_collection_endpoint"]);
+    });
+});
+
+builder.AddCustomOtelConfiguration(
+    config["appname"], 
+    config["otel_collection_endpoint"]
+);
+
+var daprClient = new DaprClientBuilder().Build();
+builder.Configuration.AddDaprSecretStore(Components.SecureStore, daprClient);
+
+builder.Services.AddCors(options => {
+    options.AddDefaultPolicy( builder => {
+        builder.WithOrigins("*");
+    });
+});
+       
+builder.Services.AddControllers();
+
+var region = Environment.GetEnvironmentVariable("AZURE_COGS_REGION");
+var cogs = new AzureCognitiveServicesClient(config[Components.SecretName], region);
+
+builder.Services.AddSingleton<DaprClient>(daprClient);
+builder.Services.AddSingleton<AzureCognitiveServicesClient>(cogs);
+builder.Services.AddAzureClients(builder => {
+    builder.AddWebPubSubServiceClient(config[Components.PubSubSecretName], Components.PubSubHubName);
+});
+builder.Services.AddSwaggerGen();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHealthChecks();
+builder.Services.AddActors(options => {
+    options.Actors.RegisterActor<TranscriptionActor>();
+});
+
+var app = builder.Build();
+app.UseCloudEvents();
+app.UseRouting();
+app.UseAuthorization();
+app.MapHealthChecks("/healthz");
+app.MapControllers();
+app.MapSubscribeHandler();
+app.MapActorsHandlers();
+
+app.Logger.LogInformation( $"{builder.Environment.ApplicationName} - App Run" );
+app.Run();
