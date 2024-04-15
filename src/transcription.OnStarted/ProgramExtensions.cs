@@ -19,8 +19,6 @@ public static class ProgramExtensions
             .AddMeter(traduireApiMeter.Name)
             .AddMeter("Microsoft.AspNetCore.Hosting")
             .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-            .AddPrometheusExporter()
-            .AddConsoleExporter()
             .AddOtlpExporter(opt =>
             {
                 opt.Protocol = OtlpExportProtocol.Grpc;
@@ -32,7 +30,6 @@ public static class ProgramExtensions
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddSource(traduireActivitySource.Name)
-            .AddConsoleExporter()
             .AddOtlpExporter(opt =>
             {
                 opt.Protocol = OtlpExportProtocol.Grpc;

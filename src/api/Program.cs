@@ -45,7 +45,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
-app.UseOpenTelemetryPrometheusScrapingEndpoint(context => context.Connection.LocalPort == 9091);
+app.MapPrometheusScrapingEndpoint().RequireHost("*:9091");
 app.MapHealthChecks("/healthz");
 app.MapControllers();
 app.MapGrpcService<TranscriberService>();
