@@ -49,7 +49,7 @@ __Or use DevContainer__
 ### Application Deployment 
 * pwsh
 * cd ./scripts
-* ./deploy_application.ps1 -AppName $AppName -Subscription BJD_AZ_SUB01 -DomainName bjdazure.tech [-SkipBuild] [-BuildOnly] [-upgrade] -verbose
+* ./deploy_services.ps1 -AppName $AppName -Subscription BJD_AZ_SUB01 -DomainName bjdazure.tech [-SkipBuild] [-BuildOnly] [-upgrade] -verbose
 * Update the DNS record of Uri to the IP Address returned by the script
 
 ### UI Deployment 

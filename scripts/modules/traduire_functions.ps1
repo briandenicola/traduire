@@ -24,12 +24,10 @@ function Build-Application
     Connect-ToAzure -SubscriptionName $SubscriptionName
     Connect-ToAzureContainerRepo -ACRName $AcrName
 
-    #Build Source
-
-    Build-DockerContainers -ContainerName "${AcrName}.azurecr.io/traduire/api:${Version}" -DockerFile "${Source}/dockerfile.api" -SourcePath $Source
-    Build-DockerContainers -ContainerName "${AcrName}.azurecr.io/traduire/onstarted.handler:${Version}" -DockerFile "${Source}/dockerfile.onstarted" -SourcePath $Source
-    Build-DockerContainers -ContainerName "${AcrName}.azurecr.io/traduire/onprocessing.handler:${Version}" -DockerFile "${Source}/dockerfile.onprocessing" -SourcePath $Source
-    Build-DockerContainers -ContainerName "${AcrName}.azurecr.io/traduire/oncompletion.handler:${Version}" -DockerFile "${Source}/dockerfile.oncompletion" -SourcePath $Source
+    Build-DockerContainers -ContainerRegistry "${AcrName}.azurecr.io" -ContainerImageTag ${Version}  -SourcePath "${Source}/api"
+    Build-DockerContainers -ContainerRegistry "${AcrName}.azurecr.io" -ContainerImageTag ${Version}  -SourcePath "${Source}/transcription.OnStarted"
+    Build-DockerContainers -ContainerRegistry "${AcrName}.azurecr.io" -ContainerImageTag ${Version}  -SourcePath "${Source}/transcription.OnProcessing"
+    Build-DockerContainers -ContainerRegistry "${AcrName}.azurecr.io" -ContainerImageTag ${Version}  -SourcePath "${Source}/transcription.OnCompletion"
 }
 
 function Write-Log 
@@ -326,16 +324,13 @@ function Get-GitCommitVersion
 function Build-DockerContainers
 {
     param(
-        [string] $ContainerName,
-        [string] $DockerFile,
+        [string] $ContainerRegistry,
+        [string] $ContainerImageTag,
         [string] $SourcePath
     )
 
-    Write-Log -Message "Building ${ContainerName}"
-    docker build --no-cache -t $ContainerName -f $DockerFile $SourcePath
-
-    Write-Log -Message "Pushing ${ContainerName}"
-    docker push $ContainerName
+    Write-Log -Message "Building and publish ${SourcePath}:${ContainerImageTag} to ${ContainerRegistry}"
+    dotnet publish -t:PublishContainer -p ContainerImageTags=$ContainerImageTag -p ContainerRegistry=${ContainerRegistry} $SourcePath
 }
 
 function  Add-IPtoAksAllowedRange 
