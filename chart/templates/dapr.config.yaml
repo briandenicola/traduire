@@ -10,7 +10,7 @@ spec:
     samplingRate: "1"
     stdout: true
     zipkin:
-      endpointAddress: {{ print .Values.ZIPKIN_ENDPOINT | quote }}
+      endpointAddress: {{ print .Values.OTEL.ZIPKIN_ENDPOINT | quote }}
   mtls:
     enabled: true
     workloadCertTTL: "24h"

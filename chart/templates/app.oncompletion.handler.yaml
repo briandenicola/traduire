@@ -43,7 +43,7 @@ spec:
         - name: TRADUIRE_APPNAME
           value: {{ .Values.APP_NAME }}
         - name: TRADUIRE_OTEL_COLLECTION_ENDPOINT
-          value: {{ .Values.OTEL_ENDPOINT }}          
+          value: {{ .Values.OTEL.ENDPOINT }}  
       tolerations:
       - key: "app"
         operator: "Equal"

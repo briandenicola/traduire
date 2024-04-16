@@ -6,8 +6,11 @@ DELAY_IN_SECONDS                        : 5
 SERVICE_PORT                            : 8081
 REGION                                  : "centralus"
 UTILS_CONTAINER                         : "bjd145/utils:3.16"
-ZIPKIN_ENDPOINT                         : "http://otel-collector.otel-system.svc.cluster.local:9411/api/v2/spans"
-OTEL_ENDPOINT                           : "http://otel-collector.otel-system.svc.cluster.local:4317"
+
+OTEL:
+  ZIPKIN_ENDPOINT                       : "http://otel-collector.otel-system.svc.cluster.local:9411/api/v2/spans"
+  ENDPOINT                              : "http://otel-collector.otel-system.svc.cluster.local:4317"
+  VERSION                               : "0.98.0"
 
 URIS:
   FRONTEND_ENDPOINT                     : ""
