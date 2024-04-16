@@ -23,7 +23,6 @@ ACR:
   NAME                                  : ""
 
 APP_INSIGHTS:
-  INSTRUMENTION_KEY                     : ""
   CONNECTION_STRING                     : ""
               
 WORKLOAD_ID:

@@ -111,8 +111,7 @@ data:
         verbosity: detailed
 
       azuremonitor:
-        endpoint: "https://dc.services.visualstudio.com/v2/track"
-        instrumentation_key:  {{ .Values.APP_INSIGHTS.INSTRUMENTION_KEY }}
+        connection_string: {{ .Values.APP_INSIGHTS.CONNECTION_STRING }}
         maxbatchsize: 100
         maxbatchinterval: 10s
 
