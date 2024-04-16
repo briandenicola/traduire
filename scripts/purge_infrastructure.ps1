@@ -7,7 +7,7 @@ Version - 1.0.0
 This PowerShell Script will tear the infrastructure for the Traduire appplication..
 
 .EXAMPLE
-.\destroy_environment.ps1 -AppName cheetah-37209 -SubscriptionName my_subscription
+.\purge_environment.ps1 -AppName cheetah-37209 -SubscriptionName my_subscription
 
 .PARAMETER AppNmame
 Specifies the Application Name as outputed by the create_core_infrastructure.ps1 script
@@ -21,7 +21,7 @@ param(
   [string] $AppName,
 
   [Parameter(Mandatory=$true)]
-  [String]            $SubscriptionName
+  [String] $SubscriptionName
 )
 
 . ./modules/traduire_functions.ps1

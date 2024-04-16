@@ -8,6 +8,9 @@
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+    <ContainerRepository>traduire/onstarted.handler</ContainerRepository>
+    <ContainerFamily>jammy-chiseled</ContainerFamily>
   </PropertyGroup>
 
   <ItemGroup>
