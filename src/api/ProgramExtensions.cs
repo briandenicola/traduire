@@ -20,7 +20,8 @@ public static class ProgramExtensions
             .AddMeter(traduireApiMeter.Name)
             .AddMeter("Microsoft.AspNetCore.Hosting")
             .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-            .AddPrometheusExporter()
+            //.AddPrometheusExporter()
+            .AddPrometheusExporter(o => o.DisableTotalNameSuffixForCounters = true) //https://github.com/open-telemetry/opentelemetry-dotnet/issues/5502
             .AddConsoleExporter()
             .AddOtlpExporter(opt =>
             {
