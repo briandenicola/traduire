@@ -13,6 +13,11 @@ variable "vm_sku" {
   default     = "Standard_D4ads_v5"
 }
 
+variable "zones" {
+  description = "The availability zones for the AKS cluster"
+  default     = ["1", "2", "3"]
+}
+
 variable "postgresql_user_name" {
   description = "Azure PostgreSQL User Name"
   type        = string
