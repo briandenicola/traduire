@@ -66,7 +66,8 @@ Keda | Autoscaler for saga components
     ./run-tests.sh traduire.bjd.tech #Or whatever your default Url from Azure Static Web Apps
 ```
 > **NOTE:** Playwright will test the UI functionality and display the trace on completion. 
-    ![Playwright](./.assets/playwright.png)
+
+![Playwright](./.assets/playwright.png)
 
 ## Interactively
 * Launch Browser
