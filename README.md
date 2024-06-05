@@ -50,9 +50,11 @@ Keda | Autoscaler for saga components
     pwsh ./deploy_services.ps1 -AppName $AppName -Subscription BJD_AZ_SUB01 -DomainName bjd.tech -verbose
 ```
 > **NOTE:** Update the DNS record of Uri to the IP Address returned by the script in the form of ${APP_NAME}.api.traduire.bjd.tech
-> **NOTE:** -Upgrade flag: Reuse existing Helm chart values and upgrade the deployment to the latest build
-> **NOTE:** -SkipBuild flag: Skip the build process and re-deploy the existing build
-> **NOTE:** -BuildOnly flag: Just build. Do not deploy 
+
+### Script Flags
+* -Upgrade flag: Reuse existing Helm chart values and upgrade the deployment to the latest build
+* -SkipBuild flag: Skip the build process and re-deploy the existing build
+* -BuildOnly flag: Just build. Do not deploy 
 
 ## UI Deployment 
 ```pwsh
