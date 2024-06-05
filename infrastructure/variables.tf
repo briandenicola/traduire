@@ -15,7 +15,7 @@ variable "vm_sku" {
 
 variable "zones" {
   description = "The availability zones for the AKS cluster"
-  default     = ["1", "2", "3"]
+  default     = ["2"]
 }
 
 variable "postgresql_user_name" {
