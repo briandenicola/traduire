@@ -49,13 +49,15 @@ __Or use DevContainer__
 ### Application Deployment 
 * pwsh
 * cd ./scripts
-* ./deploy_services.ps1 -AppName $AppName -Subscription BJD_AZ_SUB01 -DomainName bjdazure.tech [-SkipBuild] [-BuildOnly] [-upgrade] -verbose
-* Update the DNS record of Uri to the IP Address returned by the script
+* ./deploy_services.ps1 -AppName $AppName -Subscription BJD_AZ_SUB01 -DomainName bjd.tech [-SkipBuild] [-BuildOnly] [-upgrade] -verbose
+> **NOTE:** Update the DNS record of Uri to the IP Address returned by the script in the form of ${APP_NAME}.api.traduire.bjd.tech
 
 ### UI Deployment 
 * pwsh
 * cd ./scripts
-* ./deploy_ui.ps1 -AppName $AppName -DomainName bjdazure.tech -Verbose
+* ./deploy_ui.ps1 -AppName $AppName -DomainName bjd.tech -Verbose
+
+> **NOTE:** Create a CNAME record in the DNS to point to the Azure Static Web App in the form of ${APP_NAME}.traduire.bjd.tech
 
 ## Validate 
 
@@ -73,9 +75,13 @@ __Or use DevContainer__
 * Select and upload any podcast.  
     * [The History of Rome Episode #1](http://traffic.libsyn.com/historyofrome/01-_In_the_Beginning.mp3) is a great example.
     * File size must be less than 50mb and limited to one speaker
-* Click 'Check Status' to watch the transcription go through its stages 
-* Then the final result should be: \
-    ![UI](./.assets/ui.png)
+* The UI will update the status every 30 seconds until the transcription is complete. 
+    ![UI](./.assets/traduire-rome-1.png)
+    ![UI](./.assets/traduire-rome-1.png)
+* The transcriptions takes between 5 and 10 minutes to complete.
+* Once the status has been updated to `Completed` then click the `Get Transcription` button
+* Then the final result should be: 
+    ![UI](./.assets/traduire-rome-complete.png)
 
 ## Backlog 
 - [X] Add null_resource to bin Keda's identity to cluster
