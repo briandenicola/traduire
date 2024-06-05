@@ -39,9 +39,10 @@ Keda | Autoscaler for saga components
     * Run brew install `watch` on macos
 
 ## Infrastructure 
-* pwsh
-* cd ./scripts
-* ./create_infrastructure.ps1 -Subscription BJD_AZ_SUB01 -Region southcentralus 
+```pwsh
+    cd ./scripts
+    pwsh ./create_infrastructure.ps1 -Subscription BJD_AZ_SUB01 -Region southcentralus 
+```
 
 ## Application Deployment 
 ```pwsh
