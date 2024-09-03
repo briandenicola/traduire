@@ -87,6 +87,7 @@ Keda | Autoscaler for saga components
 * Once the status has been updated to `Completed` then click the `Get Transcription` button
 * Then the final result should be: 
     ![UI](./.assets/traduire-rome-complete.png)
+* [Here](./.assets/transcription.md) is a complete local copy of transcription for the above podcast.    
 
 # Backlog 
 - [X] Add null_resource to bin Keda's identity to cluster
