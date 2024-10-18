@@ -21,16 +21,16 @@ namespace Transcription.Controllers
         {
             using var activity = _traduireActivitySource.StartActivity("TranscribeController.PostActivity");
 
-            var TranscriptionId = Guid.NewGuid().ToString();
+            var id = Guid.NewGuid().ToString();
             
-            _logger.LogInformation( $"{TranscriptionId}. Request to transcribe {reference.blobURL} was received" );
-            var state = await _client.UpdateState(TranscriptionId, new Uri(reference.blobURL) );
+            _logger.LogInformation( $"{id}. Request to transcribe {reference.blobURL} was received" );
+            var state = await _client.UpdateState(id, new Uri(reference.blobURL) );
 
-            _logger.LogInformation( $"{TranscriptionId}. Record was successfully saved as to {Components.StateStoreName} State Store" );
-            await _client.PublishEvent(TranscriptionId, new Uri(reference.blobURL), cancellationToken);
+            _logger.LogInformation( $"{id}. Record was successfully saved as to {Components.StateStoreName} State Store" );
+            await _client.PublishEvent(id, new Uri(reference.blobURL), cancellationToken);
 
-            _logger.LogInformation( $"{TranscriptionId}. {reference.blobURL} was successfully published to {Components.PubSubName} PubSub Store" );
-            return Ok(new { TranscriptionId, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime });
+            _logger.LogInformation( $"{id}. {reference.blobURL} was successfully published to {Components.PubSubName} PubSub Store" );
+            return Ok(new { id, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime });
         }
     }
 }

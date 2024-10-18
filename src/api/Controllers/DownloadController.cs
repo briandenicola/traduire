@@ -15,23 +15,23 @@ namespace Transcription.Controllers
             _traduireActivitySource = traduireActivitySource;
         }
 
-        [HttpGet("{TranscriptionId}")]
-        public async Task<ActionResult> Get(string TranscriptionId, CancellationToken cancellationToken)
+        [HttpGet("{id}")]
+        public async Task<ActionResult> Get(string id, CancellationToken cancellationToken)
         {
             using var activity = _traduireActivitySource.StartActivity("DownloadController.GetActivity");
-            _logger.LogInformation( $"{TranscriptionId}. Attempting to download completed transcription" );
+            _logger.LogInformation( $"{id}. Attempting to download completed transcription" );
 
-            var state = await _client.GetState(TranscriptionId);
+            var state = await _client.GetState(id);
             if (state == null)  {
                 return NotFound();
             }
 
             if (state.Status == TraduireTranscriptionStatus.Completed) {
-                _logger.LogInformation( $"{TranscriptionId}. Current status is {TraduireTranscriptionStatus.Completed }. Returning transcription" );
-                return Ok(new { TranscriptionId, StatusMessage = state.Status, Transcription = state.TranscriptionText });
+                _logger.LogInformation( $"{id}. Current status is {TraduireTranscriptionStatus.Completed }. Returning transcription" );
+                return Ok(new { id, StatusMessage = state.Status, Transcription = state.TranscriptionText });
             }
 
-            _logger.LogInformation( $"{TranscriptionId}. Current status is {state.Status}. Transcription is not yet complete" ); 
+            _logger.LogInformation( $"{id}. Current status is {state.Status}. Transcription is not completed yet." ); 
             return NoContent();
         }
     }

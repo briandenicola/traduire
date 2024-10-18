@@ -22,21 +22,21 @@ namespace Transcription.Controllers
             apiCount = _traduireApiMeter.CreateCounter<int>("traduire.api.count", description: "Counts the times the API is called");
         }
 
-        [HttpGet("{TranscriptionId}")]
-        public async Task<ActionResult> Get(string TranscriptionId, CancellationToken cancellationToken)
+        [HttpGet("{id}")]
+        public async Task<ActionResult> Get(string id, CancellationToken cancellationToken)
         {
             using var activity = _traduireActivitySource.StartActivity("StatusController.GetActivity");
                         
-            _logger.LogInformation( $"{TranscriptionId}. Status API Called" );
+            _logger.LogInformation( $"{id}. Status API Called" );
 
-            var state = await _client.GetState(TranscriptionId);
+            var state = await _client.GetState(id);
             if (state == null) {
                 return NotFound();
             }
 
             apiCount.Add(1);
-            _logger.LogInformation( $"{TranscriptionId}. Current status is {state.Status}" );
-            return Ok(new { TranscriptionId, StatusMessage = state.Status, LastUpdated = state.LastUpdateTime });
+            _logger.LogInformation( $"{id}. Current status is {state.Status}" );
+            return Ok(new { id, StatusMessage = state.Status, LastUpdated = state.LastUpdateTime });
         }
     }
 }

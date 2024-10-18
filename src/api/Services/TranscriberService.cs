@@ -15,18 +15,18 @@ namespace Traduire.Webapi
             _logger = logger;
         }
 
-        public override async Task TranscribeAudioStream(TranscriptionRequest request, IServerStreamWriter<TranscriptionReply> responseStream, ServerCallContext context)
+        public override async Task TranscribeAudioStream(TranscriptionRequest req, IServerStreamWriter<TranscriptionReply> responseStream, ServerCallContext context)
         {
-            var TranscriptionId = Guid.NewGuid().ToString();
+            var id = Guid.NewGuid().ToString();
             var createdTime = DateTime.UtcNow.ToString();
 
             var reply = new TranscriptionReply
             {
-                TranscriptionId = TranscriptionId,
-                CreateTime = DateTime.UtcNow.ToString(),
-                LastUpdateTime = DateTime.UtcNow.ToString(),
-                Status = TraduireTranscriptionStatus.Started.ToString(),
-                BlobUri = request.BlobUri,
+                TranscriptionId = id,
+                CreateTime = createdTime,
+                LastUpdateTime = createdTime,
+                Status = nameof(TraduireTranscriptionStatus.Started),
+                BlobUri = req.BlobUri,
                 TranscriptionText = string.Empty
             };
 
@@ -34,13 +34,13 @@ namespace Traduire.Webapi
             try
             {
 
-                var state = await _client.UpdateState(TranscriptionId, new Uri(request.BlobUri) );
-                _logger.LogInformation($"{TranscriptionId}. Transcription request was saved as to {Components.StateStoreName} State Store");
+                var state = await _client.UpdateState(id, new Uri(req.BlobUri) );
+                _logger.LogInformation($"{id}. Transcription request was saved as to {Components.StateStoreName} State Store");
                 await responseStream.WriteAsync(reply);
 
-                await _client.PublishEvent(TranscriptionId, new Uri(request.BlobUri), context.CancellationToken) ;
-                _logger.LogInformation($"{TranscriptionId}. {request.BlobUri} was published to {Components.PubSubName} pubsub store");
-                reply.Status = TraduireTranscriptionStatus.SentToCognitiveServices.ToString();
+                await _client.PublishEvent(id, new Uri(req.BlobUri), context.CancellationToken) ;
+                _logger.LogInformation($"{id}. {req.BlobUri} was published to {Components.PubSubName} pubsub store");
+                reply.Status = nameof(TraduireTranscriptionStatus.SentToCognitiveServices);
                 reply.LastUpdateTime = DateTime.UtcNow.ToString();
                 await responseStream.WriteAsync(reply);
 
@@ -49,22 +49,22 @@ namespace Traduire.Webapi
                 {
                     await Task.Delay(TimeSpan.FromSeconds(waitTime));
 
-                    currentState = await _client.GetState(TranscriptionId);
+                    currentState = await _client.GetState(id);
 
-                    _logger.LogInformation($"{TranscriptionId}. Transcription status is {currentState.Status}");
+                    _logger.LogInformation($"{id}. Transcription status is {currentState.Status}");
                     reply.Status = currentState.Status.ToString();
                     reply.LastUpdateTime = DateTime.UtcNow.ToString();
                     await responseStream.WriteAsync(reply);
 
                 } while (currentState.Status != TraduireTranscriptionStatus.Completed);
 
-                _logger.LogInformation($"{TranscriptionId}. Attempting to download completed transcription");
+                _logger.LogInformation($"{id}. Attempting to download completed transcription");
                 reply.TranscriptionText = currentState.TranscriptionText;
                 await responseStream.WriteAsync(reply);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Failed to transcribe {request.BlobUri} - {ex.Message}");
+                _logger.LogWarning($"Failed to transcribe {req.BlobUri} - {ex.Message}");
                 reply.Status = TraduireTranscriptionStatus.Failed.ToString();
                 reply.LastUpdateTime = DateTime.UtcNow.ToString();
                 await responseStream.WriteAsync(reply);

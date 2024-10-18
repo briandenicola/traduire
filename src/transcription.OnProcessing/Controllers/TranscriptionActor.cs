@@ -15,7 +15,6 @@ namespace Transcription.Actors
         private readonly AzureCognitiveServicesClient _cogsClient = cogsClient;
         private readonly ILogger _logger = logger;
         private TradiureTranscriptionRequest transcriptionRequest;
-
         private string _id; 
 
         public async Task SubmitAsync(string transcriptionId, string uri)
@@ -24,7 +23,7 @@ namespace Transcription.Actors
 
             transcriptionRequest = new TradiureTranscriptionRequest()
             {
-                TranscriptionId = new Guid(transcriptionId),
+                TranscriptionId = new Guid(_id),
                 BlobUri = uri
             };
 
@@ -46,9 +45,9 @@ namespace Transcription.Actors
             return (response, code);
         }
 
-        private async Task<StateEntry<TraduireTranscription>> GetCurrentState(string transcriptionId)
+        private async Task<StateEntry<TraduireTranscription>> GetCurrentState(string id)
         {
-            var state = await _client.GetStateEntryAsync<TraduireTranscription>(Components.StateStoreName, transcriptionId);
+            var state = await _client.GetStateEntryAsync<TraduireTranscription>(Components.StateStoreName, id);
             return state;
         }
 
@@ -63,9 +62,9 @@ namespace Transcription.Actors
             await state.SaveAsync();
         }
 
-        private async Task PublishTranscriptionCompletion(string transcriptionId, string uri)
+        private async Task PublishTranscriptionCompletion(string id, string uri)
         {
-            _logger.LogInformation( $"{transcriptionId}. Azure Cognitive Services has completed processing transcription" );
+            _logger.LogInformation( $"{id}. Azure Cognitive Services has completed processing transcription" );
             
             await UpdateStateRepository(TraduireTranscriptionStatus.Completed, HttpStatusCode.OK);
 
@@ -73,7 +72,7 @@ namespace Transcription.Actors
                             Components.PubSubName, 
                             Topics.TranscriptionCompletedTopicName, 
                             new TradiureTranscriptionRequest() {
-                                TranscriptionId = new Guid(transcriptionId),
+                                TranscriptionId = new Guid(id),
                                 BlobUri = uri
                             }, 
                             CancellationToken.None);

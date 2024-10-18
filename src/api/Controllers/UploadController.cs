@@ -21,24 +21,24 @@ namespace Transcription.Controllers
         [HttpPost, DisableRequestSizeLimit]
         public async Task<ActionResult> Post([FromForm] IFormFile file, CancellationToken cancellationToken)
         {
-            var TranscriptionId = Guid.NewGuid().ToString();
+            var id = Guid.NewGuid().ToString();
 
             using var activity = _traduireActivitySource.StartActivity("UploadController.PostActivity");
         
-            _logger.LogInformation( $"{TranscriptionId}. File upload request was received." );
+            _logger.LogInformation( $"{id}. File upload request was received." );
             var response = await _client.UploadFile(file, cancellationToken);
 
-            _logger.LogInformation( $"{TranscriptionId}. File was saved to {Components.BlobStoreName} blob storage" );
+            _logger.LogInformation( $"{id}. File was saved to {Components.BlobStoreName} blob storage" );
 
             var sasUrl = await _client.GetBlobSasToken(response.blobURL, msiClientID);
-            var state = await _client.UpdateState(TranscriptionId, sasUrl);
+            var state = await _client.UpdateState(id, sasUrl);
 
-            _logger.LogInformation( $"{TranscriptionId}. Record was successfully saved as to {Components.StateStoreName} State Store" );
+            _logger.LogInformation( $"{id}. Record was successfully saved as to {Components.StateStoreName} State Store" );
             
-            await _client.PublishEvent(TranscriptionId, sasUrl, cancellationToken);
-            _logger.LogInformation( $"{TranscriptionId}. {sasUrl} was published to {Components.PubSubName} Pubsub store" );
+            await _client.PublishEvent(id, sasUrl, cancellationToken);
+            _logger.LogInformation( $"{id}. {sasUrl} was published to {Components.PubSubName} Pubsub store" );
 
-            return Ok(new { TranscriptionId, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime });
+            return Ok(new { id, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime });
         }
     }
 }
