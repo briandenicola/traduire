@@ -1,19 +1,6 @@
-using System;
-using System.IO;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-using Dapr;
-using Dapr.Client;
-using Azure.Identity;
-using Azure.Storage.Blobs;
-using Azure.Storage.Sas;
+using Transcription.Models;
 
-using transcription.models;
-
-namespace transcription.api.dapr
+namespace Transcription.Api.Dapr
 {
     public interface IDaprTranscriptionService
     {

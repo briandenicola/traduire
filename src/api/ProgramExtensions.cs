@@ -1,4 +1,4 @@
-namespace traduire.webapi;
+namespace Traduire.Webapi;
 
 public static class ProgramExtensions
 {

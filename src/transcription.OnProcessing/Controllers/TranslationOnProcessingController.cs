@@ -1,19 +1,5 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Mvc;
-using Dapr;
 using Dapr.Actors;
 using Dapr.Actors.Client;
-using Dapr.Client;
-using Azure.Messaging.WebPubSub;
-
-using transcription.models;
-using transcription.actors;
-using transcription.common;
-using transcription.common.cognitiveservices;
 
 namespace transcription.Controllers
 {
@@ -24,18 +10,19 @@ namespace transcription.Controllers
 
         [Topic(Components.PubSubName, Topics.TranscriptionProcessingTopicName)]
         [HttpPost("status")]
-        public async Task<ActionResult> Transcribe(TradiureTranscriptionRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult> Transcribe(TradiureTranscriptionRequest req, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("{transcriptionId}. {BlobUri} was successfully received by Dapr PubSub", request.TranscriptionId, request.BlobUri);
-            _logger.LogInformation("{transcriptionId}. Instantiating a Transcription Actor to handle saga",  request.TranscriptionId);
-            var transcriptionActor = GetTranscriptionActor(request.TranscriptionId);
-            await transcriptionActor.SubmitAsync(request.TranscriptionId.ToString(), request.BlobUri);
+            var id = req.TranscriptionId.ToString();
+            _logger.LogInformation($"{id}. {req.BlobUri} was successfully received by Dapr PubSub");
+            _logger.LogInformation($"{id}. Instantiating a Transcription Actor");
+            var transcriptionActor = GetTranscriptionActor(id);
+            await transcriptionActor.SubmitAsync(id, req.BlobUri);
             return Ok();
         }
 
-        private ITranscriptionActor GetTranscriptionActor(Guid transcriptId)
+        private ITranscriptionActor GetTranscriptionActor(string transcriptId)
         {
-            var actorId = new ActorId(transcriptId.ToString());
+            var actorId = new ActorId(transcriptId);
             return ActorProxy.Create<ITranscriptionActor>(actorId, nameof(TranscriptionActor));
         }
     }

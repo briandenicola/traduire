@@ -1,4 +1,4 @@
-namespace transcription.oncompletion;
+namespace Transcription.OnCompletion;
 
 public static class ProgramExtensions
 {

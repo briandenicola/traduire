@@ -21,5 +21,6 @@ global using Microsoft.Extensions.Hosting;
 global using Dapr;
 global using Azure.Messaging.WebPubSub;
 
-global using transcription.models;
-global using transcription.common.cognitiveservices;
+global using Transcription.Models;
+global using Transcription.Api.Dapr;
+global using Transcription.Common.CognitiveServices;

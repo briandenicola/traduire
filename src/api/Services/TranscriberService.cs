@@ -1,13 +1,7 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 using Grpc.Core;
 
-using transcription.models;
-using transcription.api.dapr;
-
-namespace traduire.webapi
+namespace Traduire.Webapi
 {
     public class TranscriberService : Transcriber.TranscriberBase
     {

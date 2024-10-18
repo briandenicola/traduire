@@ -13,7 +13,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "traduire_app_node_pool" {
   kubernetes_cluster_id = azurerm_kubernetes_cluster.traduire_app.id
   vnet_subnet_id        = azurerm_subnet.kubernetes.id
   vm_size               = "Standard_B4ms"
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   mode                  = "User"
   os_sku                = "Mariner"
   os_disk_type          = "Ephemeral"
@@ -26,5 +26,5 @@ resource "azurerm_kubernetes_cluster_node_pool" "traduire_app_node_pool" {
     max_surge = "25%"
   }
 
-  node_taints           = [ "app=traduire:NoSchedule" ]
+  node_taints = ["app=traduire:NoSchedule"]
 }

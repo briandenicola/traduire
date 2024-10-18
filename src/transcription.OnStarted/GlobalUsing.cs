@@ -9,9 +9,13 @@ global using OpenTelemetry.Exporter;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.AspNetCore.Mvc;
 
-global using Dapr;
+
 global using Microsoft.Extensions.Azure;
 global using Azure.Messaging.WebPubSub;
 
-global using transcription.models;
-global using transcription.common.cognitiveservices;
+global using Dapr;
+global using Dapr.Client; 
+
+global using Transcription.Models;
+global using Transcription.Common;
+global using Transcription.Common.CognitiveServices;

@@ -1,12 +1,9 @@
 using System.Net;
-using Dapr;
 using Dapr.Client;
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 
-using transcription.models;
-
-namespace transcription.api.dapr
+namespace Transcription.Api.Dapr
 {
     public class DaprTranscriptionService : IDaprTranscriptionService
     {

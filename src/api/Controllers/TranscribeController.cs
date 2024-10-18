@@ -1,15 +1,5 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Dapr.Client;
-using Microsoft.Extensions.Logging;
 
-using transcription.models;
-using transcription.api.dapr;
-
-namespace transcription.Controllers
+namespace Transcription.Controllers
 {
     [Route("api/transcribe")]
     [ApiController]

@@ -1,9 +1,5 @@
-using Dapr.Client;
 using Dapr.Extensions.Configuration;
-
-using transcription.models;
-using transcription.processing;
-using transcription.actors;
+using Transcription.Processing;
 
 var configBuilder = new ConfigurationBuilder();
 configBuilder.AddEnvironmentVariables(prefix: "TRADUIRE_");

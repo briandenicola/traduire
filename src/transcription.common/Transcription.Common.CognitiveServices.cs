@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Linq;
 
-namespace transcription.common.cognitiveservices
+namespace Transcription.Common.CognitiveServices
 {
     public class AzureCognitiveServicesClient
     {

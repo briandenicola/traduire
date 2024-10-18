@@ -1,11 +1,6 @@
-using System.Net;
-using System.Threading.Tasks;
 using Dapr.Actors;
 
-using transcription.models;
-using transcription.common.cognitiveservices;
-
-namespace transcription.actors
+namespace Transcription.Actors
 {
     public interface ITranscriptionActor : IActor
     {

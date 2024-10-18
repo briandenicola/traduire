@@ -26,15 +26,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapr.AspNetCore" Version="1.12.0" />
-    <PackageReference Include="Dapr.Extensions.Configuration" Version="1.12.0" />
-    <PackageReference Include="Azure.Identity" Version="1.11.0" />
+    <PackageReference Include="Dapr.AspNetCore" Version="1.14.0" />
+    <PackageReference Include="Dapr.Extensions.Configuration" Version="1.14.0" />
+    <PackageReference Include="Azure.Identity" Version="1.12.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Azure.Messaging.WebPubSub" Version="1.3.0" />
     <PackageReference Include="Microsoft.Extensions.Azure" Version="1.7.1" />
-    <ProjectReference Include="..\transcription.models\transcription.models.csproj" />
-    <ProjectReference Include="..\transcription.common\transcription.common.csproj" />
+    <ProjectReference Include="..\transcription.models\Transcription.Models.csproj" />
+    <ProjectReference Include="..\transcription.common\Transcription.Common.csproj" />
   </ItemGroup>
 </Project>

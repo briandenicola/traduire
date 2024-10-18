@@ -9,13 +9,12 @@ resource "azapi_update_resource" "cluster_updates" {
   body = jsonencode({
     properties = {
       networkProfile = {
-        monitoring = {
-          enabled = true
+        advancedNetworking = {
+          observability = {
+            enabled = true
+          }
         }
       }
     }
   })
 }
-
-#https://grafana.com/grafana/dashboards/18814-kubernetes-networking/
-#https://grafana.com/grafana/dashboards/16611-cilium-metrics/

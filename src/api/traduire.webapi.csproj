@@ -32,16 +32,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapr.AspNetCore" Version="1.12.0" />
+    <PackageReference Include="Dapr.AspNetCore" Version="1.14.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
-    <PackageReference Include="Azure.Identity" Version="1.11.0" />
+    <PackageReference Include="Azure.Identity" Version="1.12.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.59.0" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.59.0" />
-    <ProjectReference Include="..\transcription.models\transcription.models.csproj" />
-    <ProjectReference Include="..\transcription.common\transcription.common.csproj" />
+    <ProjectReference Include="..\transcription.models\Transcription.Models.csproj" />
+    <ProjectReference Include="..\transcription.common\Transcription.Common.csproj" />
   </ItemGroup>
 
 </Project>

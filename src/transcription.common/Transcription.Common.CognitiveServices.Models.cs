@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Text.Json.Serialization;
 using System.Collections.Generic;
 
-namespace transcription.common.cognitiveservices
+namespace Transcription.Common.CognitiveServices
 {
     public enum ProfanityFilterMode
     {

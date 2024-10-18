@@ -1,4 +1,4 @@
-namespace transcription.processing;
+namespace Transcription.Processing;
 
 public static class ProgramExtensions
 {

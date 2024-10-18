@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Dapr.Client;
-using transcription.api.dapr;
-using traduire.webapi;
+using Traduire.Webapi;
 
 var configBuilder = new ConfigurationBuilder();
 configBuilder.AddEnvironmentVariables(prefix: "TRADUIRE_");

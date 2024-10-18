@@ -1,6 +1,6 @@
 using System;
 
-namespace transcription.models
+namespace Transcription.Models
 {
     public class Topics
     {

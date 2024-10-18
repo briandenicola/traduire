@@ -1,22 +1,6 @@
-using System;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Text.Encodings.Web;
-using Dapr;
-using Dapr.Client;
-using Microsoft.Extensions.Logging;
+using Transcription.Api.Dapr;
 
-using transcription.models;
-using transcription.api.dapr;
-
-namespace transcription.Controllers
+namespace Transcription.Controllers
 {
     [Route("api/status")]
     [ApiController]

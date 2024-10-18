@@ -1,42 +1,29 @@
-using System;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using Dapr;
-using Dapr.Client;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Mvc;
-using Azure.Messaging.WebPubSub;
-using Azure.Core;
 
-using transcription.models;
-using transcription.common;
-using transcription.common.cognitiveservices;
-
-namespace transcription.Controllers
+namespace Transcription.Controllers
 {
     [ApiController]
-    public class TranslationOnStarted(ILogger<TranslationOnStarted> logger, DaprClient Client, AzureCognitiveServicesClient CogsClient, WebPubSubServiceClient ServiceClient) : ControllerBase
+    public class TranslationOnStarted(ILogger<TranslationOnStarted> logger, DaprClient client, AzureCognitiveServicesClient cogsClient, WebPubSubServiceClient serviceClient) : ControllerBase
     {
-        private readonly TraduireNotificationService _serviceClient = new(ServiceClient);
-        private readonly DaprClient _client = Client;
-        private readonly AzureCognitiveServicesClient _cogsClient = CogsClient;
+        private readonly TraduireNotificationService _serviceClient = new(serviceClient);
+        private readonly DaprClient _client = client;
+        private readonly AzureCognitiveServicesClient _cogsClient = cogsClient;
         private readonly ILogger _logger = logger;
 
         [Topic(Components.PubSubName, Topics.TranscriptionSubmittedTopicName)]
         [HttpPost("transcribe")]
-        public async Task<ActionResult> Transcribe(TradiureTranscriptionRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult> Transcribe(TradiureTranscriptionRequest req, CancellationToken cancellationToken)
         {
-            _logger.LogInformation( $"{request.TranscriptionId}. {request.BlobUri} was successfully received by Dapr PubSub" );
-            (Transcription response, HttpStatusCode code) = await _cogsClient.SubmitTranscriptionRequestAsync(new Uri(request.BlobUri));
+            var id = req.TranscriptionId.ToString();
+            _logger.LogInformation( $"{id}. {req.BlobUri} was successfully received by Dapr PubSub" );
 
-            await _serviceClient.PublishNotification(request.TranscriptionId.ToString(), response.Status);
+            (Common.CognitiveServices.Transcription response, HttpStatusCode code) = await _cogsClient.SubmitTranscriptionRequestAsync(new Uri(req.BlobUri));
+            await _serviceClient.PublishNotification(id, response.Status);
 
             return code switch
             {
-                HttpStatusCode.Created => await HandleSuccess(response.Self, request.TranscriptionId),
-                _ => await HandleFailure(response.Self, request.TranscriptionId),
+                HttpStatusCode.Created => await HandleSuccess(response.Self, req.TranscriptionId),
+                _ => await HandleFailure(response.Self, req.TranscriptionId),
             };
         }
 
@@ -59,7 +46,7 @@ namespace transcription.Controllers
 
         private async Task<ActionResult> HandleFailure(string uri, Guid transcriptionId)
         {
-            _logger.LogInformation( $"{transcriptionId}. Transcription Failed for an unexpected reason. Added to Failed Queue for review" );
+            _logger.LogInformation( $"{transcriptionId}. Transcription Failed for an unexpected reason. Review {Topics.TranscriptionFailedTopicName} topic for details" );
             await UpdateStateRepository(TraduireTranscriptionStatus.Failed, HttpStatusCode.BadRequest, uri, transcriptionId);
 
             await _client.PublishEventAsync(

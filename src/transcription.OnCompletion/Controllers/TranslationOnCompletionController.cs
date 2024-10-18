@@ -1,60 +1,45 @@
-using System;
-using System.Linq;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using Dapr;
-using Dapr.Client;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using Azure.Messaging.WebPubSub;
-using Azure.Core;
 
-using transcription.models;
-using transcription.common;
-using transcription.common.cognitiveservices;
-
-namespace transcription.Controllers
+namespace Transcription.Controllers
 {
     [ApiController]
-    public class TranslationOnCompletion(ILogger<TranslationOnCompletion> logger, DaprClient Client, AzureCognitiveServicesClient CogsClient, WebPubSubServiceClient ServiceClient) : ControllerBase
+    public class TranslationOnCompletion(ILogger<TranslationOnCompletion> logger, DaprClient client, AzureCognitiveServicesClient cogsClient, WebPubSubServiceClient serviceClient) : ControllerBase
     {
 
         private StateEntry<TraduireTranscription> state;
-        private readonly TraduireNotificationService _serviceClient = new(ServiceClient);
-        private readonly DaprClient _client = Client;
-        private readonly AzureCognitiveServicesClient _cogsClient = CogsClient;
+        private readonly TraduireNotificationService _serviceClient = new(serviceClient);
+        private readonly DaprClient _client = client;
+        private readonly AzureCognitiveServicesClient _cogsClient = cogsClient;
         private readonly ILogger _logger = logger;
 
         [Topic(Components.PubSubName, Topics.TranscriptionCompletedTopicName)]
         [HttpPost("completed")]
-        public async Task<ActionResult> Transcribe(TradiureTranscriptionRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult> Transcribe(TradiureTranscriptionRequest req, CancellationToken cancellationToken)
         {
-            _logger.LogInformation( $"{request.TranscriptionId}. {request.BlobUri} was successfully received by Dapr PubSub" );
-            state = await _client.GetStateEntryAsync<TraduireTranscription>(Components.StateStoreName, request.TranscriptionId.ToString(), cancellationToken: cancellationToken);
-            state.Value ??= new TraduireTranscription();
+            var id = req.TranscriptionId.ToString();
+            _logger.LogInformation( $"{id}. {req.BlobUri} was successfully received by Dapr PubSub" );
+            //var state = await GetState(id);
 
-            (TranscriptionResults result, HttpStatusCode code) = await _cogsClient.DownloadTranscriptionResultAsync(new Uri(request.BlobUri));
+            (TranscriptionResults result, HttpStatusCode code) = await _cogsClient.DownloadTranscriptionResultAsync(new Uri(req.BlobUri));
 
             switch (code)
             {
                 case HttpStatusCode.OK:
-                    _logger.LogInformation( $"{request.TranscriptionId}. Transcription from '{request.BlobUri}' was saved to state store" );
-                    var firstChannel = result.CombinedRecognizedPhrases.FirstOrDefault();
+                    _logger.LogInformation( $"{id}. Transcription from '{req.BlobUri}' was saved to state store" );
+                    var text = result.CombinedRecognizedPhrases.FirstOrDefault().Display;
 
-                    await _serviceClient.PublishNotification(request.TranscriptionId.ToString(), state.Value.Status.ToString());
-                    await UpdateStateRepository(TraduireTranscriptionStatus.Completed, firstChannel.Display);
+                    await _serviceClient.PublishNotification(id, nameof(TraduireTranscriptionStatus.Completed));
+                    await UpdateStateRepository(TraduireTranscriptionStatus.Completed, text);
 
-                    _logger.LogInformation( $"{request.TranscriptionId}. All working completed on request" );
-                    return Ok(request.TranscriptionId);
+                    _logger.LogInformation( $"{id}. All work has been completed for the request" );
+                    return Ok(id);
             
                 default:
-                    _logger.LogInformation( $"{request.TranscriptionId}. Transcription Failed for an unexpected reason. Added to Failed Queue for review" );
+                    _logger.LogInformation( $"{id}. Transcription Failed for an unexpected reason. Review {Topics.TranscriptionFailedTopicName} topic for details" );
                     await _client.PublishEventAsync(
                                     Components.PubSubName, 
                                     Topics.TranscriptionFailedTopicName, 
-                                    await UpdateStateRepository(TraduireTranscriptionStatus.Failed, code, request.BlobUri), 
+                                    await UpdateStateRepository(TraduireTranscriptionStatus.Failed, code, req.BlobUri), 
                                     cancellationToken);
                     break;
             }
@@ -83,6 +68,13 @@ namespace transcription.Controllers
             state.Value.Status = status;
             state.Value.TranscriptionText = text;
             await state.SaveAsync();
+        }
+
+        private async Task<StateEntry<TraduireTranscription>> GetState(string transcriptionId)
+        {
+            var item = await _client.GetStateEntryAsync<TraduireTranscription>(Components.StateStoreName, transcriptionId);
+            item.Value ??= new TraduireTranscription();
+            return item;
         }
     }
 }

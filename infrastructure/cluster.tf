@@ -21,7 +21,7 @@ resource "azurerm_kubernetes_cluster" "traduire_app" {
     ]
   }
 
-  depends_on = [ 
+  depends_on = [
     azurerm_user_assigned_identity.aks_identity,
     azurerm_user_assigned_identity.aks_kubelet_identity,
     azurerm_log_analytics_workspace.this,
@@ -37,8 +37,8 @@ resource "azurerm_kubernetes_cluster" "traduire_app" {
   node_resource_group          = "${azurerm_resource_group.traduire_app.name}_k8s_nodes"
   dns_prefix                   = local.aks_name
   sku_tier                     = "Standard"
-  automatic_channel_upgrade    = "patch"
-  node_os_channel_upgrade      = "NodeImage"
+  automatic_upgrade_channel    = "patch"
+  node_os_upgrade_channel      = "NodeImage"
   oidc_issuer_enabled          = true
   workload_identity_enabled    = true
   azure_policy_enabled         = true
@@ -50,15 +50,15 @@ resource "azurerm_kubernetes_cluster" "traduire_app" {
   image_cleaner_interval_hours = 48
 
   api_server_access_profile {
-    vnet_integration_enabled = true
-    subnet_id                = azurerm_subnet.api.id
-    authorized_ip_ranges     = local.allowed_ip_range
+    #vnet_integration_enabled = true
+    #subnet_id                = azurerm_subnet.api.id
+    authorized_ip_ranges = local.allowed_ip_range
   }
 
   azure_active_directory_role_based_access_control {
-    managed                = true
-    azure_rbac_enabled     = true
-    tenant_id              = data.azurerm_client_config.current.tenant_id
+    #managed                = true
+    azure_rbac_enabled = true
+    tenant_id          = data.azurerm_client_config.current.tenant_id
   }
 
   linux_profile {
@@ -80,19 +80,19 @@ resource "azurerm_kubernetes_cluster" "traduire_app" {
   }
 
   default_node_pool {
-    name                = "system"
-    node_count          = 3
-    vm_size             = var.vm_sku
-    zones               = local.zones
-    os_disk_size_gb     = 100
-    vnet_subnet_id      = azurerm_subnet.kubernetes.id
-    os_sku              = "Mariner"
-    os_disk_type        = "Ephemeral"
-    type                = "VirtualMachineScaleSets"
-    enable_auto_scaling = true
-    min_count           = 3
-    max_count           = 9
-    max_pods            = 60
+    name                 = "system"
+    node_count           = 3
+    vm_size              = var.vm_sku
+    zones                = local.zones
+    os_disk_size_gb      = 100
+    vnet_subnet_id       = azurerm_subnet.kubernetes.id
+    os_sku               = "Mariner"
+    os_disk_type         = "Ephemeral"
+    type                 = "VirtualMachineScaleSets"
+    auto_scaling_enabled = true
+    min_count            = 3
+    max_count            = 9
+    max_pods             = 60
     upgrade_settings {
       max_surge = "33%"
     }
@@ -108,21 +108,21 @@ resource "azurerm_kubernetes_cluster" "traduire_app" {
   }
 
   maintenance_window_auto_upgrade {
-    frequency = "Weekly"
-    interval  = 1
-    duration  = 4
+    frequency   = "Weekly"
+    interval    = 1
+    duration    = 4
     day_of_week = "Friday"
-    utc_offset = "-06:00"
-    start_time = "20:00"
+    utc_offset  = "-06:00"
+    start_time  = "20:00"
   }
 
   maintenance_window_node_os {
-    frequency = "Weekly"
-    interval  = 1
-    duration  = 4
+    frequency   = "Weekly"
+    interval    = 1
+    duration    = 4
     day_of_week = "Saturday"
-    utc_offset = "-06:00"
-    start_time = "20:00"
+    utc_offset  = "-06:00"
+    start_time  = "20:00"
   }
 
   auto_scaler_profile {
@@ -139,12 +139,12 @@ resource "azurerm_kubernetes_cluster" "traduire_app" {
   }
 
   microsoft_defender {
-    log_analytics_workspace_id      = azurerm_log_analytics_workspace.this.id
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
   }
 
   monitor_metrics {
   }
-  
+
   key_vault_secrets_provider {
     secret_rotation_enabled = true
   }

@@ -1,8 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
-using transcription.models;
-using transcription.api.dapr;
-
-namespace transcription.Controllers
+namespace Transcription.Controllers
 {
     [Route("api/download")]
     [ApiController]

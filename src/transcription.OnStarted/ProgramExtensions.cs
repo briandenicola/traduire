@@ -1,4 +1,4 @@
-namespace transcription.onstarted;
+namespace Transcription.OnStarted;
 public static class ProgramExtensions
 {
     public static void AddCustomOtelConfiguration (this WebApplicationBuilder builder, string ApplicationName, string otelConnnectionString)

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "traduire.webapi";
+option csharp_namespace = "Traduire.Webapi";
 
 package transcription;
 

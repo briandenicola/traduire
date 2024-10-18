@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Messaging.WebPubSub;
 
-namespace transcription.common
+namespace Transcription.Common
 {
     public class TraduireNotificationService
     {
