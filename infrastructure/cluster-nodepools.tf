@@ -15,7 +15,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "traduire_app_node_pool" {
   vm_size               = "Standard_B4ms"
   auto_scaling_enabled  = true
   mode                  = "User"
-  os_sku                = "Mariner"
+  os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 30
   node_count            = 3

@@ -86,7 +86,7 @@ resource "azurerm_kubernetes_cluster" "traduire_app" {
     zones                = local.zones
     os_disk_size_gb      = 100
     vnet_subnet_id       = azurerm_subnet.kubernetes.id
-    os_sku               = "Mariner"
+    os_sku               = "AzureLinux"
     os_disk_type         = "Ephemeral"
     type                 = "VirtualMachineScaleSets"
     auto_scaling_enabled = true
