@@ -2,7 +2,7 @@ namespace Traduire.Webapi;
 
 public static class ProgramExtensions
 {
-    public static void AddCustomOtelConfiguration (this WebApplicationBuilder builder, string ApplicationName, string otelConnnectionString)
+    public static void AddCustomOtelConfiguration(this WebApplicationBuilder builder, string ApplicationName, string otelConnnectionString)
     {
         var credential = new DefaultAzureCredential();
         var otel = builder.Services.AddOpenTelemetry();
@@ -13,7 +13,7 @@ public static class ProgramExtensions
         otel.ConfigureResource(resource => resource
             .AddService(serviceName: ApplicationName));
 
-        otel.WithMetrics( metrics => metrics
+        otel.WithMetrics(metrics => metrics
             .AddAspNetCoreInstrumentation()
             .AddRuntimeInstrumentation()
             .AddHttpClientInstrumentation()
@@ -30,7 +30,7 @@ public static class ProgramExtensions
             })
         );
 
-        otel.WithTracing( tracing => tracing
+        otel.WithTracing(tracing => tracing
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddSource(traduireActivitySource.Name)

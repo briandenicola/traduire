@@ -21,22 +21,22 @@ namespace Transcription.Controllers
         [HttpPost, DisableRequestSizeLimit]
         public async Task<ActionResult> Post([FromForm] IFormFile file, CancellationToken cancellationToken)
         {
-            var id = Guid.NewGuid().ToString();
+            string id = Helper.NewGuid();
 
             using var activity = _traduireActivitySource.StartActivity("UploadController.PostActivity");
-        
-            _logger.LogInformation( $"{id}. File upload request was received." );
+
+            _logger.LogInformation($"{id}. File upload request was received.");
             var response = await _client.UploadFile(file, cancellationToken);
 
-            _logger.LogInformation( $"{id}. File was saved to {Components.BlobStoreName} blob storage" );
+            _logger.LogInformation($"{id}. File was saved to {Components.BlobStoreName} blob storage");
 
             var sasUrl = await _client.GetBlobSasToken(response.blobURL, msiClientID);
             var state = await _client.UpdateState(id, sasUrl);
 
-            _logger.LogInformation( $"{id}. Record was successfully saved as to {Components.StateStoreName} State Store" );
-            
+            _logger.LogInformation($"{id}. Record was successfully saved as to {Components.StateStoreName} State Store");
+
             await _client.PublishEvent(id, sasUrl, cancellationToken);
-            _logger.LogInformation( $"{id}. {sasUrl} was published to {Components.PubSubName} Pubsub store" );
+            _logger.LogInformation($"{id}. {sasUrl} was published to {Components.PubSubName} Pubsub store");
 
             return Ok(new { id, StatusMessage = state.Value.Status, LastUpdated = state.Value.LastUpdateTime });
         }

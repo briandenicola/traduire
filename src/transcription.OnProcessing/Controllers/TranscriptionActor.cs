@@ -15,7 +15,7 @@ namespace Transcription.Actors
         private readonly AzureCognitiveServicesClient _cogsClient = cogsClient;
         private readonly ILogger _logger = logger;
         private TradiureTranscriptionRequest transcriptionRequest;
-        private string _id; 
+        private string _id;
 
         public async Task SubmitAsync(string transcriptionId, string uri)
         {
@@ -29,7 +29,7 @@ namespace Transcription.Actors
 
             await UpdateStateRepository(TraduireTranscriptionStatus.Pending, HttpStatusCode.Accepted);
 
-            _logger.LogInformation( $"{_id}. Registering {ProcessingStatusReminder} Actor Reminder for {WAIT_TIME} seconds" );
+            _logger.LogInformation($"{_id}. Registering {ProcessingStatusReminder} Actor Reminder for {WAIT_TIME} seconds");
 
             await RegisterReminderAsync(
                 ProcessingStatusReminder,
@@ -64,17 +64,18 @@ namespace Transcription.Actors
 
         private async Task PublishTranscriptionCompletion(string id, string uri)
         {
-            _logger.LogInformation( $"{id}. Azure Cognitive Services has completed processing transcription" );
-            
+            _logger.LogInformation($"{id}. Azure Cognitive Services has completed processing transcription");
+
             await UpdateStateRepository(TraduireTranscriptionStatus.Completed, HttpStatusCode.OK);
 
             await _client.PublishEventAsync(
-                            Components.PubSubName, 
-                            Topics.TranscriptionCompletedTopicName, 
-                            new TradiureTranscriptionRequest() {
+                            Components.PubSubName,
+                            Topics.TranscriptionCompletedTopicName,
+                            new TradiureTranscriptionRequest()
+                            {
                                 TranscriptionId = new Guid(id),
                                 BlobUri = uri
-                            }, 
+                            },
                             CancellationToken.None);
 
             await UnregisterReminderAsync(ProcessingStatusReminder);
@@ -82,7 +83,7 @@ namespace Transcription.Actors
 
         private async Task PublishTranscriptionFailure()
         {
-            _logger.LogInformation( $"{_id}. Transcription Failed for an unexpected reason. Review {Topics.TranscriptionFailedTopicName} topic for details" );
+            _logger.LogInformation($"{_id}. Transcription Failed for an unexpected reason. Review {Topics.TranscriptionFailedTopicName} topic for details");
             await UpdateStateRepository(TraduireTranscriptionStatus.Failed, HttpStatusCode.BadRequest);
 
             await _client.PublishEventAsync(Components.PubSubName, Topics.TranscriptionFailedTopicName, transcriptionRequest, CancellationToken.None);
@@ -91,7 +92,7 @@ namespace Transcription.Actors
 
         private async Task PublishTranscriptionStillProcessing()
         {
-            _logger.LogInformation( $"{_id}. Azure Cognitive Services is still progressing request" );
+            _logger.LogInformation($"{_id}. Azure Cognitive Services is still progressing request");
             await UpdateStateRepository(TraduireTranscriptionStatus.Pending, HttpStatusCode.OK);
         }
 
@@ -102,12 +103,15 @@ namespace Transcription.Actors
             switch (code)
             {
                 case HttpStatusCode.OK when response.Status == "Succeeded":
+                    _logger.LogInformation($"{_id}. Azure Cognitive Services successfully completed processing transcription");
                     await PublishTranscriptionCompletion(_id, response.Links.Files);
                     break;
                 case HttpStatusCode.OK:
+                    _logger.LogInformation($"{_id}. Azure Cognitive Services is still progressing request");
                     await PublishTranscriptionStillProcessing();
                     break;
                 default:
+                    _logger.LogWarning($"{_id}. Transcription Failed for an unexpected reason");
                     await PublishTranscriptionFailure();
                     break;
             }

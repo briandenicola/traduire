@@ -24,3 +24,4 @@ global using Azure.Messaging.WebPubSub;
 global using Transcription.Models;
 global using Transcription.Api.Dapr;
 global using Transcription.Common.CognitiveServices;
+global using Transcription.Common;

@@ -17,7 +17,7 @@ namespace Transcription.Controllers
         public async Task<ActionResult> Transcribe(TradiureTranscriptionRequest req, CancellationToken cancellationToken)
         {
             var id = req.TranscriptionId.ToString();
-            _logger.LogInformation( $"{id}. {req.BlobUri} was successfully received by Dapr PubSub" );
+            _logger.LogInformation($"{id}. {req.BlobUri} was successfully received by Dapr PubSub");
             //var state = await GetState(id);
 
             (TranscriptionResults result, HttpStatusCode code) = await _cogsClient.DownloadTranscriptionResultAsync(new Uri(req.BlobUri));
@@ -25,21 +25,21 @@ namespace Transcription.Controllers
             switch (code)
             {
                 case HttpStatusCode.OK:
-                    _logger.LogInformation( $"{id}. Transcription from '{req.BlobUri}' was saved to state store" );
+                    _logger.LogInformation($"{id}. Transcription from '{req.BlobUri}' was saved to state store");
                     var text = result.CombinedRecognizedPhrases.FirstOrDefault().Display;
 
                     await _serviceClient.PublishNotification(id, nameof(TraduireTranscriptionStatus.Completed));
                     await UpdateStateRepository(TraduireTranscriptionStatus.Completed, text);
 
-                    _logger.LogInformation( $"{id}. All work has been completed for the request" );
+                    _logger.LogInformation($"{id}. All work has been completed for the request");
                     return Ok(id);
-            
+
                 default:
-                    _logger.LogInformation( $"{id}. Transcription Failed for an unexpected reason. Review {Topics.TranscriptionFailedTopicName} topic for details" );
+                    _logger.LogInformation($"{id}. Transcription Failed for an unexpected reason. Review {Topics.TranscriptionFailedTopicName} topic for details");
                     await _client.PublishEventAsync(
-                                    Components.PubSubName, 
-                                    Topics.TranscriptionFailedTopicName, 
-                                    await UpdateStateRepository(TraduireTranscriptionStatus.Failed, code, req.BlobUri), 
+                                    Components.PubSubName,
+                                    Topics.TranscriptionFailedTopicName,
+                                    await UpdateStateRepository(TraduireTranscriptionStatus.Failed, code, req.BlobUri),
                                     cancellationToken);
                     break;
             }

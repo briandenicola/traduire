@@ -11,7 +11,7 @@ namespace Transcription.Controllers
         private static ActivitySource _traduireActivitySource;
         private static Meter _traduireApiMeter;
         private readonly Counter<int> apiCount;
-    
+
         public StatusController(ILogger<StatusController> logger, DaprTranscriptionService client, ActivitySource traduireActivitySource, Meter traduireApiMeter)
         {
             _logger = logger;
@@ -26,16 +26,18 @@ namespace Transcription.Controllers
         public async Task<ActionResult> Get(string id, CancellationToken cancellationToken)
         {
             using var activity = _traduireActivitySource.StartActivity("StatusController.GetActivity");
-                        
-            _logger.LogInformation( $"{id}. Status API Called" );
+
+            _logger.LogInformation($"{id}. Status API Called");
 
             var state = await _client.GetState(id);
-            if (state == null) {
+            if (state == null)
+            {
+                _logger.LogWarning($"{id}. Transcription not found.");
                 return NotFound();
             }
 
             apiCount.Add(1);
-            _logger.LogInformation( $"{id}. Current status is {state.Status}" );
+            _logger.LogInformation($"{id}. Current status is {state.Status}");
             return Ok(new { id, StatusMessage = state.Status, LastUpdated = state.LastUpdateTime });
         }
     }

@@ -9,27 +9,32 @@ var config = configBuilder.Build();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
-builder.Logging.AddOpenTelemetry(logging => { 
+builder.Logging.AddOpenTelemetry(logging =>
+{
     logging.IncludeScopes = true;
     logging.AddConsoleExporter();
-    logging.AddOtlpExporter(otlpOptions => {
+    logging.AddOtlpExporter(otlpOptions =>
+    {
         otlpOptions.Protocol = OtlpExportProtocol.Grpc;
         otlpOptions.Endpoint = new Uri(config["otel_collection_endpoint"]);
     });
 });
 
-builder.WebHost.ConfigureKestrel(opts => {
+builder.WebHost.ConfigureKestrel(opts =>
+{
     opts.ListenAnyIP(9091, o => o.Protocols = HttpProtocols.Http1);
     opts.ListenAnyIP(8080, o => o.Protocols = HttpProtocols.Http1AndHttp2);
 });
 
 builder.AddCustomOtelConfiguration(
-    config["appname"], 
+    config["appname"],
     config["otel_collection_endpoint"]
 );
 
-builder.Services.AddCors(options => {
-    options.AddDefaultPolicy( builder => {
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
         builder.WithOrigins("*");
     });
 });
@@ -50,5 +55,5 @@ app.MapControllers();
 app.MapGrpcService<TranscriberService>();
 app.MapGrpcReflectionService();
 
-app.Logger.LogInformation( $"{builder.Environment.ApplicationName} - App Run" );
+app.Logger.LogInformation($"{builder.Environment.ApplicationName} - App Run");
 app.Run();

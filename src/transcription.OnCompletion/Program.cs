@@ -9,25 +9,29 @@ var config = configBuilder.Build();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
-builder.Logging.AddOpenTelemetry(logging => { 
+builder.Logging.AddOpenTelemetry(logging =>
+{
     logging.IncludeScopes = true;
     logging.AddConsoleExporter();
-    logging.AddOtlpExporter(otlpOptions => {
+    logging.AddOtlpExporter(otlpOptions =>
+    {
         otlpOptions.Protocol = OtlpExportProtocol.Grpc;
         otlpOptions.Endpoint = new Uri(config["otel_collection_endpoint"]);
     });
 });
 
 builder.AddCustomOtelConfiguration(
-    config["appname"], 
+    config["appname"],
     config["otel_collection_endpoint"]
 );
 
 var daprClient = new DaprClientBuilder().Build();
 builder.Configuration.AddDaprSecretStore(Components.SecureStore, daprClient);
 
-builder.Services.AddCors(options => {
-    options.AddDefaultPolicy( builder => {
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
         builder.WithOrigins("*");
     });
 });
@@ -39,7 +43,8 @@ var cogs = new AzureCognitiveServicesClient(builder.Configuration[Components.Sec
 
 builder.Services.AddSingleton<DaprClient>(daprClient);
 builder.Services.AddSingleton<AzureCognitiveServicesClient>(cogs);
-builder.Services.AddAzureClients(azure => {
+builder.Services.AddAzureClients(azure =>
+{
     azure.AddWebPubSubServiceClient(builder.Configuration[Components.PubSubSecretName], Components.PubSubHubName);
 });
 builder.Services.AddSwaggerGen();
@@ -54,5 +59,5 @@ app.MapHealthChecks("/healthz");
 app.MapControllers();
 app.MapSubscribeHandler();
 
-app.Logger.LogInformation( $"{builder.Environment.ApplicationName} - App Run" );
+app.Logger.LogInformation($"{builder.Environment.ApplicationName} - App Run");
 app.Run();

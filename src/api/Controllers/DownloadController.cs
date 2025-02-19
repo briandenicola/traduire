@@ -19,19 +19,22 @@ namespace Transcription.Controllers
         public async Task<ActionResult> Get(string id, CancellationToken cancellationToken)
         {
             using var activity = _traduireActivitySource.StartActivity("DownloadController.GetActivity");
-            _logger.LogInformation( $"{id}. Attempting to download completed transcription" );
+            _logger.LogInformation($"{id}. Attempting to download completed transcription");
 
             var state = await _client.GetState(id);
-            if (state == null)  {
+            if (state == null)
+            {
+                _logger.LogWarning($"{id}. Transcription not found.");
                 return NotFound();
             }
 
-            if (state.Status == TraduireTranscriptionStatus.Completed) {
-                _logger.LogInformation( $"{id}. Current status is {TraduireTranscriptionStatus.Completed }. Returning transcription" );
+            if (state.Status == TraduireTranscriptionStatus.Completed)
+            {
+                _logger.LogInformation($"{id}. Current status is {TraduireTranscriptionStatus.Completed}. Returning transcription");
                 return Ok(new { id, StatusMessage = state.Status, Transcription = state.TranscriptionText });
             }
 
-            _logger.LogInformation( $"{id}. Current status is {state.Status}. Transcription is not completed yet." ); 
+            _logger.LogInformation($"{id}. Current status is {state.Status}. Transcription is not completed yet.");
             return NoContent();
         }
     }
